@@ -160,7 +160,12 @@ module.exports = app => {
     if (await verification(req, res)) {
       try {
         const { tokenUser } = req;
-        const tasks = await Order.find({ shop: tokenUser.shop, status: { $in: [WAITING, READY] }, paid: true })
+        const tasks = await Order
+          .find({ shop: tokenUser.shop, status: { $in: [WAITING, READY] }, paid: true })
+          .populate('shop')
+          .populate('products.product')
+          .populate('products.options')
+          .populate('products.volume');
         res.send(
           tasks.sort((a, b) => {
             const aTime = (new Date(a.date)).getTime() + parseFloat(a.time) * 60 * 1000 - Date.now();
@@ -176,12 +181,13 @@ module.exports = app => {
     }
   });
 
-  app.post("/tasks/:id/ready", (req, res) => {
+  app.post("/tasks/:id/ready", async (req, res) => {
     const { id } = req.params;
 
     try {
-      Order.updateOne({ _id: id }, { $set: { status: READY } });
-      res.send('OK');
+      await Order.updateOne({ _id: id }, { $set: { status: READY } });
+      const order = await Order.findOne({ _id: id });
+      res.send(order);
     } catch (e) {
       res.status(400).send({
         error: 'Ошибка'
@@ -190,12 +196,13 @@ module.exports = app => {
 
   });
 
-  app.post("/tasks/:id/complete", (req, res) => {
+  app.post("/tasks/:id/complete", async (req, res) => {
     const { id } = req.params;
 
     try {
-      Order.updateOne({ _id: id }, { $set: { status: COMPLETED } });
-      res.send('OK');
+      await Order.updateOne({ _id: id }, { $set: { status: COMPLETED } });
+      const order = await Order.findOne({ _id: id });
+      res.send(order);
     } catch (e) {
       res.status(400).send({
         error: 'Ошибка'
@@ -204,12 +211,13 @@ module.exports = app => {
 
   });
 
-  app.post("/tasks/:id/hide", (req, res) => {
+  app.post("/tasks/:id/hide", async (req, res) => {
     const { id } = req.params;
 
     try {
-      Order.updateOne({ _id: id }, { $set: { status: HIDDEN } });
-      res.send('OK');
+      await Order.updateOne({ _id: id }, { $set: { status: HIDDEN } });
+      const order = await Order.findOne({ _id: id });
+      res.send(order);
     } catch (e) {
       res.status(400).send({
         error: 'Ошибка'
