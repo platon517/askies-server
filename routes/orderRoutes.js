@@ -132,7 +132,7 @@ module.exports = app => {
           checkPayment(savedOrder._id, response.data.id);
           return res.send({
             _id: savedOrder._id,
-            confirmation_token: response.data.confirmation.confirmation_token,
+            confirmationToken: response.data.confirmation.confirmation_token,
           });
         })
         .catch(err => console.log(err));
@@ -216,6 +216,56 @@ module.exports = app => {
       });
     }
 
+  });
+
+  app.get("/orders/:deviceId", async (req, res) => {
+    try {
+      const { deviceId } = req.params;
+      const orders = await Order
+        .find({ deviceId })
+        .populate('shop')
+        .populate('products.product')
+        .populate('products.options')
+        .populate('products.volume')
+        .sort({
+          _id: -1
+        });
+      res.send(orders);
+    } catch (e) {
+      res.status(400).send({
+        error: 'Ошибка сервера'
+      });
+    }
+  });
+
+  app.get("/orders/:id/:deviceId", async (req, res) => {
+    try {
+      const { id, deviceId } = req.params;
+      const order = await Order
+        .findOne({ _id: id, deviceId })
+        .populate('shop')
+        .populate('products.product')
+        .populate('products.options')
+        .populate('products.volume');
+
+      axios({
+        method: 'get',
+        url: `/payments/${order.paymentId}/`,
+      })
+        .then(async response => {
+          console.log(response.data);
+          if (response.data.paid) {
+            await markOrderPaid(id);
+            res.send(order);
+          } else {
+            res.send({...order.toObject(), number: ''});
+          }
+        });
+    } catch (e) {
+      res.status(400).send({
+        error: 'Ошибка сервера'
+      });
+    }
   });
 
 };
