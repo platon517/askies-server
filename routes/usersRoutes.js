@@ -28,12 +28,6 @@ module.exports = app => {
       user.login = login;
       user.password = await bcrypt.hash(password, saltRounds);
       user.accountType = users.length > 0 ? accountType : admin;
-      if (accountType === entityAdmin) {
-        if ( !entity ) {
-          return res.status(400).send('Заполните юр лицо');
-        }
-        user.entity = entity;
-      }
       if (accountType === barista) {
         if ( !entity || !shop ) {
           return res.status(400).send('Заполните все поля');
