@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-const dbPath = 'mongodb+srv://platon517:5902168brut@vendetta-1-r7a2c.mongodb.net/main?retryWrites=true&w=majority';
+const dbPath = 'mongodb+srv://prod:5902168Brut@main.nt3vv.mongodb.net/main?retryWrites=true&w=majority';
 const options = {useNewUrlParser: true, useUnifiedTopology: true};
 const mongo = mongoose.connect(dbPath, options);
 
