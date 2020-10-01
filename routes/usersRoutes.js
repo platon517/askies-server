@@ -27,7 +27,7 @@ module.exports = app => {
       const users = User.find({});
       user.login = login;
       user.password = await bcrypt.hash(password, saltRounds);
-      user.accountType = users.length > 0 ? accountType : admin;
+      user.accountType = (users.length > 0) ? accountType : admin;
       if (accountType === barista) {
         if ( !entity || !shop ) {
           return res.status(400).send('Заполните все поля');
