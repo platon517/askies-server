@@ -22,7 +22,7 @@ module.exports = app => {
         const { name, owner } = req.body;
         if (!name || !owner) {
           return res.status(400).send({'error': 'Complete all fields'});
-        };
+        }
         const ownerObj = await User.findOne({ _id: owner });
         if (ownerObj.accountType !== admin && ownerObj.accountType !== entityAdmin) {
           return res.status(400).send({'error': 'Owner need to be admin'});
