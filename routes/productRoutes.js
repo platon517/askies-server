@@ -6,13 +6,17 @@ const { upload, deleteImage } = require('../helpers/upload');
 
 module.exports = app => {
   app.get("/products", async (req, res) => {
-    const { skip, limit, search = '' } = req.query;
+    const { skip, limit, search = '', shop = null } = req.query;
     if (await adminVerify(req, res)) {
       try {
         const totalProducts = await Product.find({});
+        const filter = { name: {$regex : `.*${search}.*`, $options:'i'} };
+        if (shop) {
+          filter.shop = shop
+        }
         const products =
           await Product
-            .find({ name: {$regex : `.*${search}.*`, $options:'i'} })
+            .find(filter)
             .select('+volumes')
             .populate('volumes')
             .select('+options')
