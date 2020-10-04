@@ -31,7 +31,7 @@ const orderSchema = mongoose.Schema({
       volume: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Volume',
-        required: true
+        required: false
       }
     }],
     required: false
@@ -79,7 +79,9 @@ orderSchema.pre('save', async function(next) {
 
     const productVolume = await Volume.findOne({ _id: product.volume });
 
-    productSum += parseFloat(productVolume.extraPrice);
+    if (productVolume) {
+      productSum += parseFloat(productVolume.extraPrice);
+    }
 
     const productOptions = await Option.find({ _id: { $in: product.options } });
 
