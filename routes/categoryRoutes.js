@@ -5,7 +5,7 @@ module.exports = app => {
 
   app.get('/categories', async (req, res) => {
     try {
-      const categories = await Category.find({}).exec();
+      const categories = await Category.find({}).sort({ order: 1 }).exec();
       return res.send(categories);
     } catch (e) {
       res.status(400).send({'error': 'An error has occurred'});
@@ -22,6 +22,24 @@ module.exports = app => {
         const category = new Category();
         category.name = name;
         await category.save();
+        return res.send(category);
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
+  app.put('/categories/:id/set-order', async (req, res) => {
+    if (await adminVerify(req, res)) {
+      try {
+        const { id } = req.params;
+        const { order } = req.body;
+        if ( !id ) {
+          return res.status(400).send('id не найдено');
+        }
+
+        await Category.update({ _id: id }, { $set: { order } });
+        const category = await Category.findOne({ _id: id });
         return res.send(category);
       } catch (e) {
         res.status(400).send({'error': 'An error has occurred'});

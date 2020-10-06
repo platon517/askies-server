@@ -9,6 +9,11 @@ const entitySchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  promoCode: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PromoCode',
+    required: false
   }
 });
 

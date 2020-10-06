@@ -64,7 +64,7 @@ module.exports = app => {
 
       if (result) {
         const token = jwt.sign({ _id: user._id }, jwtConfig.secret, {
-          expiresIn: 86400 // expires in 24 hours
+          expiresIn: user.accountType === barista ? 86400 * 365 : 86400// expires in 24 hours
         });
         res.send({
           _id: user._id,

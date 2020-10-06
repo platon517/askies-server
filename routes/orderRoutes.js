@@ -2,6 +2,8 @@ const axios = require('axios');
 const adminVerify = require('../helpers/adminVerify');
 const verification = require('../helpers/verification');
 const Order = require('../models/orderModel');
+const Shop = require('../models/shopModel');
+const Entity = require('../models/entityModel');
 const uniqid = require('uniqid');
 
 axios.defaults.baseURL = 'https://payment.yandex.net/api/v3';
@@ -73,7 +75,7 @@ module.exports = app => {
   });
 
   app.post("/orders", async (req, res) => {
-    const { products, shop, waitTime, deviceId } = req.body;
+    const { products, shop, waitTime, deviceId, promoCode } = req.body;
 
     let number;
 
@@ -82,7 +84,7 @@ module.exports = app => {
         .toString(10)
         .substr(2, 6);
 
-      const sameOrders = Order.find({
+      const sameOrders = await Order.find({
         number,
         shop,
         status: { $in: [COMPLETED, CANCELLED] }
@@ -101,6 +103,15 @@ module.exports = app => {
       order.waitTime = waitTime;
       order.createdAt = new Date();
       order.status = WAITING;
+
+      if (promoCode) {
+        const shopObj = await Shop.findOne({ _id: shop });
+        const entity = await Entity.findOne({ _id: shopObj.entity });
+        if (entity.promoCode && entity.promoCode.equals(promoCode)) {
+          order.promoCode = promoCode;
+        }
+      }
+
       await order.save();
       const savedOrder = await Order.findOne({ _id: order._id }).populate('products.product');
 
@@ -252,6 +263,7 @@ module.exports = app => {
       const order = await Order
         .findOne({ _id: id, deviceId })
         .populate('shop')
+        .populate('promoCode')
         .populate('products.product')
         .populate('products.options')
         .populate('products.volume');

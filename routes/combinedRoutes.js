@@ -6,6 +6,7 @@ const optionRoutes = require("./optionRoutes");
 const productRoutes = require("./productRoutes");
 const orderRoutes = require("./orderRoutes");
 const paymentRoutes = require("./paymentRoutes");
+const promoCodeRoutes = require("./promoCodeRoutes");
 
 module.exports = (app) => {
   usersRoutes(app);
@@ -17,4 +18,5 @@ module.exports = (app) => {
   productRoutes(app);
   orderRoutes(app);
   paymentRoutes(app);
+  promoCodeRoutes(app);
 };

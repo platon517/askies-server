@@ -8,7 +8,7 @@ module.exports = app => {
   app.get('/entities', async (req, res) => {
     if (await adminVerify(req, res)) {
       try {
-        const entities = await Entity.find({}).populate('owner').exec();
+        const entities = await Entity.find({}).populate('owner').populate('promoCodes').exec();
         return res.send(entities);
       } catch (e) {
         res.status(400).send({'error': 'An error has occurred'});
@@ -43,6 +43,19 @@ module.exports = app => {
       const { id } = req.params;
       try {
         await Entity.deleteOne({ _id: id });
+        return res.send('OK');
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
+  app.post('/entities/:id/promo-code', async (req, res) => {
+    if (await adminVerify(req, res)) {
+      const { id } = req.params;
+      const { promoCodeId } = req.body;
+      try {
+        await Entity.update({ _id: id }, { $set: { promoCode: promoCodeId } });
         return res.send('OK');
       } catch (e) {
         res.status(400).send({'error': 'An error has occurred'});

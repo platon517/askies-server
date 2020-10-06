@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Product = require('./productModel');
 const Volume = require('./volumeModel');
 const Option = require('./optionModel');
+const PromoCode = require('./promoCodeModel');
 
 const orderSchema = mongoose.Schema({
   number: {
@@ -64,6 +65,11 @@ const orderSchema = mongoose.Schema({
   status: {
     type: String,
     required: true
+  },
+  promoCode: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PromoCode',
+    required: false
   }
 });
 
@@ -89,6 +95,11 @@ orderSchema.pre('save', async function(next) {
 
     sum += (productSum * parseFloat(product.count))
   }
+  if (this.promoCode) {
+    const promoCode = await PromoCode.findOne({ _id: this.promoCode._id });
+    sum = sum * ((100 - promoCode.discountValue) / 100)
+  }
+  sum = Math.ceil(sum);
   this.sum = sum;
   next();
 });
