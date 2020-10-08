@@ -75,7 +75,7 @@ module.exports = app => {
   });
 
   app.post("/orders", async (req, res) => {
-    const { products, shop, waitTime, deviceId, promoCode } = req.body;
+    const { products, shop, waitTime, appUser, promoCode } = req.body;
 
     let number;
 
@@ -98,7 +98,7 @@ module.exports = app => {
 
       order.number = number;
       order.shop = shop;
-      order.deviceId = deviceId;
+      order.appUser = appUser;
       order.products = products;
       order.waitTime = waitTime;
       order.createdAt = new Date();
@@ -237,11 +237,11 @@ module.exports = app => {
 
   });
 
-  app.get("/orders/:deviceId", async (req, res) => {
+  app.get("/orders/:appUser", async (req, res) => {
     try {
-      const { deviceId } = req.params;
+      const { appUser } = req.params;
       const orders = await Order
-        .find({ deviceId })
+        .find({ appUser })
         .populate('shop')
         .populate('products.product')
         .populate('products.options')
@@ -257,11 +257,11 @@ module.exports = app => {
     }
   });
 
-  app.get("/orders/:id/:deviceId", async (req, res) => {
+  app.get("/orders/:id/:appUser", async (req, res) => {
     try {
-      const { id, deviceId } = req.params;
+      const { id, appUser } = req.params;
       const order = await Order
-        .findOne({ _id: id, deviceId })
+        .findOne({ _id: id, appUser })
         .populate('shop')
         .populate('promoCode')
         .populate('products.product')

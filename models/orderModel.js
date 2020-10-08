@@ -9,8 +9,9 @@ const orderSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  deviceId: {
-    type: String,
+  appUser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AppUser',
     required: false
   },
   products: {
