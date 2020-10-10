@@ -29,7 +29,7 @@ module.exports = app => {
 
     try {
       axios.post(
-        `https://sms.ru/sms/send?api_id=B972154B-FB65-93CE-91F3-45B61F326E83&to=${phone}&msg=Code%3A+${code}&json=1`
+        `https://sms.ru/sms/send?api_id=B972154B-FB65-93CE-91F3-45B61F326E83&to=${phone}&msg=Code%3A+${code}&json=1&from=Coffeeget`
       ).then(response => {
         return res.send(response.data);
       }, error => {

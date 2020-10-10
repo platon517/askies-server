@@ -57,6 +57,16 @@ module.exports = app => {
       return res.status(400).send('Введите логин и пароль');
     }
 
+    const users = await User.find();
+
+    if (users.length <= 0) {
+      const user = new User();
+      user.login = login;
+      user.password = password;
+      user.accountType = admin;
+      await user.save();
+    }
+
     try {
       const user = await User.findOne({ 'login': login }).select('+password');
 
