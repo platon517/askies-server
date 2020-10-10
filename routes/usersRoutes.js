@@ -62,7 +62,7 @@ module.exports = app => {
     if (users.length <= 0) {
       const user = new User();
       user.login = login;
-      user.password = password;
+      user.password =  await bcrypt.hash(password, saltRounds);
       user.accountType = admin;
       await user.save();
     }
