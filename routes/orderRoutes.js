@@ -138,6 +138,7 @@ module.exports = app => {
           await Order.updateOne({ _id: savedOrder._id }, { $set: {
               confirmationToken: response.data.confirmation.confirmation_token,
               paymentId: response.data.id,
+              createdAt: new Date(),
               paid: false
           } });
           checkPayment(savedOrder._id, response.data.id);
