@@ -33,7 +33,7 @@ const checkPayment = (orderId, paymentId, tryCount = 0) => {
 const markOrderPaid = async orderId => {
 
   try {
-    await Order.updateOne({ _id: orderId }, { $set: { paid: true } });
+    await Order.updateOne({ _id: orderId }, { $set: { paid: true, createdAt: new Date(), } });
   } catch (e) {
     console.error(e);
   }
@@ -138,7 +138,6 @@ module.exports = app => {
           await Order.updateOne({ _id: savedOrder._id }, { $set: {
               confirmationToken: response.data.confirmation.confirmation_token,
               paymentId: response.data.id,
-              createdAt: new Date(),
               paid: false
           } });
           checkPayment(savedOrder._id, response.data.id);
