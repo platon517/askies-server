@@ -12,32 +12,38 @@ module.exports = app => {
       await appUser.save();
     }
 
-    if (
-      appUser.smsCodeCreatedAt &&
-      ((new Date().getTime() - appUser.smsCodeCreatedAt.getTime()) / 1000) < 60
-    ) {
-      return res.status(400).send(
-        `Попробуйте через ${60 - Math.floor((new Date().getTime() - appUser.smsCodeCreatedAt.getTime()) / 1000)} секунд.`
-      );
+    if ( phone !== '99999999999') {
+      if (
+        appUser.smsCodeCreatedAt &&
+        ((new Date().getTime() - appUser.smsCodeCreatedAt.getTime()) / 1000) < 60
+      ) {
+        return res.status(400).send(
+          `Попробуйте через ${60 - Math.floor((new Date().getTime() - appUser.smsCodeCreatedAt.getTime()) / 1000)} секунд.`
+        );
+      }
     }
 
-    const code = Math.random()
+    const code = phone === '99999999999' ? '0000' : Math.random()
       .toString(10)
       .substr(2, 4);
 
     await AppUser.update({ phone }, { $set: { smsCode: code, smsCodeCreatedAt: new Date() } });
 
-    try {
-      axios.post(
-        `https://sms.ru/sms/send?api_id=B972154B-FB65-93CE-91F3-45B61F326E83&to=${phone}&msg=Code%3A+${code}&json=1&from=Coffeeget`
-      ).then(response => {
-        return res.send(response.data);
-      }, error => {
-        return res.status(400).send('Ошибка при отправке смс');
-      });
-     //res.send(code);
-    } catch (e) {
-      res.status(400).send('Ошибка при отправке смс');
+    if ( phone !== '99999999999') {
+      try {
+        axios.post(
+          `https://sms.ru/sms/send?api_id=B972154B-FB65-93CE-91F3-45B61F326E83&to=${phone}&msg=Code%3A+${code}&json=1&from=Coffeeget`
+        ).then(response => {
+          return res.send(response.data);
+        }, error => {
+          return res.status(400).send('Ошибка при отправке смс');
+        });
+        //res.send(code);
+      } catch (e) {
+        res.status(400).send('Ошибка при отправке смс');
+      }
+    } else {
+      res.send('ok');
     }
   });
 
