@@ -1,6 +1,8 @@
 const axios = require('axios');
 const AppUser = require('../models/appUserModel');
 
+const fakeNumber = '99999';
+
 module.exports = app => {
 
   app.post('/phone', async (req, res) => {
@@ -12,7 +14,7 @@ module.exports = app => {
       await appUser.save();
     }
 
-    if ( phone !== '99999999999') {
+    if ( phone !== fakeNumber) {
       if (
         appUser.smsCodeCreatedAt &&
         ((new Date().getTime() - appUser.smsCodeCreatedAt.getTime()) / 1000) < 60
@@ -23,13 +25,13 @@ module.exports = app => {
       }
     }
 
-    const code = phone === '99999999999' ? '0000' : Math.random()
+    const code = phone === fakeNumber ? '0000' : Math.random()
       .toString(10)
       .substr(2, 4);
 
     await AppUser.update({ phone }, { $set: { smsCode: code, smsCodeCreatedAt: new Date() } });
 
-    if ( phone !== '99999999999') {
+    if ( phone !== fakeNumber) {
       try {
         axios.post(
           `https://sms.ru/sms/send?api_id=B972154B-FB65-93CE-91F3-45B61F326E83&to=${phone}&msg=Code%3A+${code}&json=1&from=Coffeeget`
