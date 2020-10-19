@@ -6,8 +6,19 @@ const adminVerify = require('../helpers/adminVerify');
 module.exports = app => {
 
   app.get('/shops', async (req, res) => {
+    if (await adminVerify(req, res)) {
+      try {
+        const shops = await Shop.find({}).populate('entity').exec();
+        return res.send(shops);
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
+  app.get('/app/shops', async (req, res) => {
     try {
-      const shops = await Shop.find({}).populate('entity').exec();
+      const shops = await Shop.find({ isHidden: false }).populate('entity').exec();
       return res.send(shops);
     } catch (e) {
       res.status(400).send({'error': 'An error has occurred'});
@@ -38,15 +49,34 @@ module.exports = app => {
   app.post('/shops', async (req, res) => {
     if (await adminVerify(req, res)) {
       try {
-        const { address, coordinate, entity } = req.body;
-        if ( !coordinate.latitude || !coordinate.longitude || !address || !entity ) {
+        const { address, coordinate, entity, isHidden } = req.body;
+        if ( !coordinate.latitude || !coordinate.longitude || !address || !entity || (isHidden === undefined) ) {
           return res.status(400).send('Заполните все поля');
         }
         const shop = new Shop();
         shop.address = address;
         shop.coordinate = coordinate;
         shop.entity = entity;
+        shop.isHidden = isHidden;
         await shop.save();
+        return res.send(shop);
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
+  app.put('/shops/:id', async (req, res) => {
+    if (await adminVerify(req, res)) {
+      try {
+        const { id } = req.params;
+        const { isHidden } = req.body;
+        if ( !id ) {
+          return res.status(400).send('id не найдено');
+        }
+
+        await Shop.update({ _id: id }, { $set: { isHidden } });
+        const shop = await Shop.findOne({ _id: id });
         return res.send(shop);
       } catch (e) {
         res.status(400).send({'error': 'An error has occurred'});
