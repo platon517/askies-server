@@ -19,6 +19,10 @@ const shopSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Entity',
     required: true
+  },
+  isHidden: {
+    type: Boolean,
+    required: true
   }
 });
 

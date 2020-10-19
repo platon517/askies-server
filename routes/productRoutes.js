@@ -42,10 +42,12 @@ module.exports = app => {
 
   app.post("/products", upload.single("image"), async (req, res) => {
     if (await adminVerify(req, res)) {
-      const { name, description, price, category, shop } = req.body;
+      const { name, description, price, category, shop, options } = req.body;
 
       if ( !name || !price || !description || !category || !req.file || !shop) {
-        await deleteImage(req.file.location);
+        if (req.file.location) {
+          await deleteImage(req.file.location);
+        }
         return res.status(400).send('Заполните все поля');
       }
 
@@ -58,6 +60,9 @@ module.exports = app => {
         product.category = category;
         product.description = description;
         product.shop = shop;
+        if (options) {
+          product.options = options;
+        }
 
         await product.save();
 
@@ -125,48 +130,6 @@ module.exports = app => {
       const product = await Product.findOne({ _id: id }).populate('volumes').populate('options').exec();
 
       res.send(product);
-    }
-  });
-
-  app.post("/products/:id/options", async (req, res) => {
-    if (await adminVerify(req, res)) {
-      const { id } = req.params;
-      const { options } = req.body;
-      if (!options) {
-        return res.status(400).send({
-          error: 'Введите значения'
-        });
-      }
-
-      try {
-        const newOptions = [];
-        for (const option of options) {
-          const { name, extraPrice } = option;
-
-          if ( !name || !extraPrice ) {
-            return res.status(400).send({
-              error: 'Заполните все поля'
-            });
-          }
-          const newOption = new Option();
-          newOption.name = name;
-          newOption.extraPrice = extraPrice;
-          newOption.product = id;
-          await newOption.save();
-          newOptions.push(newOption._id);
-        }
-
-        await Product.update({ _id: id }, { $push: { options: newOptions } });
-
-        const product = await Product.findOne({ _id: id }).populate('volumes').populate('options').exec();
-
-        res.send(product);
-      } catch (e) {
-        return res.status(400).send({
-          error: "An error has occurred"
-        });
-      }
-
     }
   });
 
