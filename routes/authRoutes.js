@@ -81,11 +81,10 @@ module.exports = app => {
     try {
       await AppUser.updateOne({ _id: appUser }, { $set: { pushToken: token } });
       console.log('token:', token);
+      return res.send(token);
     } catch (e) {
       return res.status(400).send('Ошибка')
     }
-
-    return res.send(user);
   });
 
 };
