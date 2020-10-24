@@ -58,4 +58,34 @@ module.exports = app => {
 
   });
 
+  app.get('/push-token/:appUser', async (req, res) => {
+    const { appUser } = req.params;
+    let user = await AppUser.findOne({ _id: appUser });
+
+    if (!user) {
+      return res.status(400).send('Пользователь не найден');
+    }
+
+    return res.send(user.pushToken);
+  });
+
+  app.post('/push-token/:appUser', async (req, res) => {
+    const { appUser } = req.params;
+    const { token } = req.body;
+    let user = await AppUser.findOne({ _id: appUser });
+
+    if (!user) {
+      return res.status(400).send('Пользователь не найден');
+    }
+
+    try {
+      await AppUser.updateOne({ _id: appUser }, { $set: { pushToken: token } });
+      console.log('token:', token);
+    } catch (e) {
+      return res.status(400).send('Ошибка')
+    }
+
+    return res.send(user);
+  });
+
 };

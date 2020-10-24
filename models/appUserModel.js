@@ -12,6 +12,9 @@ const appUserSchema = mongoose.Schema({
   },
   smsCodeCreatedAt: {
     type: Date
+  },
+  pushToken: {
+    type: String,
   }
 });
 

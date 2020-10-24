@@ -38,6 +38,32 @@ module.exports = app => {
     }
   });
 
+  app.put('/entities/:id', async (req, res) => {
+    if (await adminVerify(req, res)) {
+      try {
+        const { id } = req.params;
+        const { kassaShopId, kassaApiToken } = req.body;
+        if ( !id ) {
+          return res.status(400).send('id не найдено');
+        }
+
+        const entity = await Entity.findOne({ _id: id });
+
+        if (kassaShopId) {
+          await Entity.update({ _id: id }, { $set: { kassaShopId } });
+        }
+
+        if (kassaApiToken) {
+          await Entity.update({ _id: id }, { $set: { kassaApiToken } });
+        }
+
+        return res.send(entity);
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
   app.delete('/entities/:id', async (req, res) => {
     if (await adminVerify(req, res)) {
       const { id } = req.params;

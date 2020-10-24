@@ -14,16 +14,15 @@ module.exports = app => {
     }
   });
 
-  /*app.post('/options', async (req, res) => {
+  app.post('/options', async (req, res) => {
     if (await adminVerify(req, res)) {
       try {
-        const { name, product, extraPrice } = req.body;
-        if ( !name || !product || !extraPrice ) {
+        const { name, extraPrice } = req.body;
+        if ( !name || !extraPrice ) {
           return res.status(400).send('Заполните все поля');
         }
         const option = new Option();
         option.name = name;
-        option.product = product;
         option.extraPrice = extraPrice;
         await option.save();
         return res.send(option);
@@ -31,7 +30,7 @@ module.exports = app => {
         res.status(400).send({'error': 'An error has occurred'});
       }
     }
-  });*/
+  });
 
   app.delete('/options/:id', async (req, res) => {
     if (await adminVerify(req, res)) {

@@ -14,7 +14,15 @@ const entitySchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PromoCode',
     required: false
-  }
+  },
+  kassaShopId: {
+    type: String,
+    required: false
+  },
+  kassaApiToken: {
+    type: String,
+    required: false
+  },
 });
 
 module.exports = mongoose.model('Entity', entitySchema);

@@ -54,6 +54,8 @@ module.exports = app => {
       try {
         const product = new Product();
 
+        console.log(options);
+
         product.name = name;
         product.price = price;
         product.img = req.file.location;
@@ -61,7 +63,7 @@ module.exports = app => {
         product.description = description;
         product.shop = shop;
         if (options) {
-          product.options = options;
+          product.options = options.split(',');
         }
 
         await product.save();

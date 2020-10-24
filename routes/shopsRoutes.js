@@ -1,3 +1,4 @@
+const Entity = require('../models/entityModel');
 const Shop = require('../models/shopModel');
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
@@ -5,7 +6,7 @@ const adminVerify = require('../helpers/adminVerify');
 
 module.exports = app => {
 
-  app.get('/shops', async (req, res) => {
+  app.get('/shops/all', async (req, res) => {
     if (await adminVerify(req, res)) {
       try {
         const shops = await Shop.find({}).populate('entity').exec();
@@ -16,7 +17,7 @@ module.exports = app => {
     }
   });
 
-  app.get('/app/shops', async (req, res) => {
+  app.get('/shops', async (req, res) => {
     try {
       const shops = await Shop.find({ isHidden: false }).populate('entity').exec();
       return res.send(shops);
@@ -75,8 +76,14 @@ module.exports = app => {
           return res.status(400).send('id не найдено');
         }
 
-        await Shop.update({ _id: id }, { $set: { isHidden } });
         const shop = await Shop.findOne({ _id: id });
+        const entity = await Entity.findOne({ _id: shop.entity });
+
+        if (!entity.kassaShopId || !entity.kassaApiToken) {
+          return res.status(400).send('Касса не подключена');
+        }
+
+        await Shop.update({ _id: id }, { $set: { isHidden } });
         return res.send(shop);
       } catch (e) {
         res.status(400).send({'error': 'An error has occurred'});
