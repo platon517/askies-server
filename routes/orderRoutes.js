@@ -185,7 +185,7 @@ module.exports = app => {
           await sendNotification({
             to: order.appUser.pushToken,
             sound: 'default',
-            title: 'Заказ подтвержден!',
+            title: 'Заказ подтвержден',
             body: `Номер заказа: ${order.number}`,
             data: { type: 'ORDER_ACCEPTED', orderId: order._id },
           });
