@@ -58,17 +58,6 @@ module.exports = app => {
 
   });
 
-  app.get('/push-token/:appUser', async (req, res) => {
-    const { appUser } = req.params;
-    let user = await AppUser.findOne({ _id: appUser });
-
-    if (!user) {
-      return res.status(400).send('Пользователь не найден');
-    }
-
-    return res.send(user.pushToken);
-  });
-
   app.post('/push-token/:appUser', async (req, res) => {
     const { appUser } = req.params;
     const { token } = req.body;

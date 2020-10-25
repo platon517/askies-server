@@ -187,7 +187,7 @@ module.exports = app => {
             sound: 'default',
             title: 'Заказ подтвержден',
             body: `Номер заказа: ${order.number}`,
-            data: { type: 'ORDER_ACCEPTED', orderId: order._id },
+            data: { type: 'ORDER', orderId: order._id },
           });
 
           return res.send(order);
@@ -230,6 +230,15 @@ module.exports = app => {
         }
       }).then(async response => {
         if ( response.data.status === 'canceled' ) {
+
+          await sendNotification({
+            to: order.appUser.pushToken,
+            sound: 'default',
+            title: 'Заказ отменен',
+            body: `Ваш заказ был отменен кофейней`,
+            data: { type: 'ORDER', orderId: order._id },
+          });
+
           return res.send(order);
         } else {
           await Order.updateOne({ _id: id }, { $set: { status: WAITING } });
