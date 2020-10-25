@@ -17,7 +17,7 @@ module.exports = async (push) => {
     }
   })();
 
-  /*let receiptIds = [];
+  let receiptIds = [];
   for (let ticket of tickets) {
     // NOTE: Not all tickets have IDs; for example, tickets for notifications
     // that could not be enqueued will have error information and no receipt ID.
@@ -47,6 +47,6 @@ module.exports = async (push) => {
         console.error(error);
       }
     }
-  })();*/
+  })();
 
 };
