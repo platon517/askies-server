@@ -188,6 +188,7 @@ module.exports = app => {
             title: 'Заказ подтвержден',
             body: `Номер заказа: ${order.number}`,
             data: { type: 'ORDER', orderId: order._id },
+            priority: 'high'
           });
 
           return res.send(order);
@@ -237,6 +238,7 @@ module.exports = app => {
             title: 'Заказ отменен',
             body: `Ваш заказ был отменен кофейней`,
             data: { type: 'ORDER', orderId: order._id },
+            priority: 'high'
           });
 
           return res.send(order);
