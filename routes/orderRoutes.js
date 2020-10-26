@@ -215,7 +215,7 @@ module.exports = app => {
 
     try {
 
-      const order = await Order.findOne({ _id: id }).populate('appUser');;
+      const order = await Order.findOne({ _id: id }).populate('appUser');
       const shopObj = await Shop.findOne({ _id: order.shop });
       const entity = await Entity.findOne({ _id: shopObj.entity });
 
