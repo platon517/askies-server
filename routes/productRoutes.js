@@ -2,7 +2,9 @@ const Product = require('../models/productModel');
 const Volume = require('../models/volumeModel');
 const Option = require('../models/optionModel');
 const adminVerify = require('../helpers/adminVerify');
+const verification = require('../helpers/verification');
 const { upload, deleteImage } = require('../helpers/upload');
+const { admin, entityAdmin, barista } = require('../constants/accountTypes');
 
 module.exports = app => {
   app.get("/products", async (req, res) => {
@@ -38,13 +40,68 @@ module.exports = app => {
         return res.send({ error: "An error has occurred" });
       }
     }
+    return res.status(400).send('auth error')
+  });
+
+  app.get("/barista/products", async (req, res) => {
+    const { skip, limit, search = ''} = req.query;
+    if (await verification(req, res)) {
+      try {
+        const { tokenUser: { accountType, shop } } = req;
+        if (accountType === barista) {
+          const totalProducts = await Product.find({});
+          const filter = { name: {$regex : `.*${search}.*`, $options:'i'} };
+          if (shop) {
+            filter.shop = shop
+          }
+          const products =
+            await Product
+              .find(filter)
+              .sort({
+                _id: -1
+              })
+              .skip(parseFloat(skip))
+              .limit(parseFloat(limit))
+              .exec();
+          return res.send(
+            {
+              data: products,
+              count: totalProducts.length
+            }
+          );
+        }
+      } catch (e) {
+        return res.send({ error: "An error has occurred" });
+      }
+    }
+    return res.status(400).send('auth error')
+  });
+
+  app.post("/barista/products/:id/hide", async (req, res) => {
+    const { id } = req.params;
+    const { value } = req.body;
+    if (await verification(req, res)) {
+      try {
+        const { tokenUser: { accountType, shop } } = req;
+        if (accountType === barista) {
+          if (value === undefined) {
+            return res.status(400).send('value required')
+          }
+          await Product.updateOne({ _id: id, shop: shop }, { $set: { hidden: value } });
+          return res.send('ok');
+        }
+      } catch (e) {
+        return res.send({ error: "An error has occurred" });
+      }
+    }
+    return res.status(400).send('auth error')
   });
 
   app.post("/products", upload.single("image"), async (req, res) => {
     if (await adminVerify(req, res)) {
       const { name, description, price, category, shop, options } = req.body;
 
-      if ( !name || !price || !description || !category || !req.file || !shop) {
+      if ( !name || !price || !category || !req.file || !shop) {
         if (req.file.location) {
           await deleteImage(req.file.location);
         }
@@ -54,14 +111,13 @@ module.exports = app => {
       try {
         const product = new Product();
 
-        console.log(options);
-
         product.name = name;
         product.price = price;
         product.img = req.file.location;
         product.category = category;
         product.description = description;
         product.shop = shop;
+        product.hidden = false;
         if (options) {
           product.options = options.split(',');
         }

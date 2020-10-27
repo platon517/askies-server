@@ -31,11 +31,11 @@ module.exports = app => {
       const { id } = req.params;
       const products =
         await Product
-          .find({ shop: id })
+          .find({ shop: id, hidden: false })
           .select('+volumes')
           .populate('volumes')
           .select('+options')
-          .populate('options')
+          .populate('options', null, { hidden: false })
           .populate('category')
           .sort({
             _id: -1

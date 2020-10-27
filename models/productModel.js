@@ -42,6 +42,9 @@ const productSchema = mongoose.Schema({
     }],
     required: false,
     //select: false
+  },
+  hidden: {
+    type: Boolean
   }
 });
 
