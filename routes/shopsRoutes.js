@@ -3,6 +3,8 @@ const Shop = require('../models/shopModel');
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
 const adminVerify = require('../helpers/adminVerify');
+const verification = require('../helpers/verification');
+const { admin, entityAdmin, barista } = require('../constants/accountTypes');
 
 module.exports = app => {
 
@@ -23,6 +25,18 @@ module.exports = app => {
       return res.send(shops);
     } catch (e) {
       res.status(400).send({'error': 'An error has occurred'});
+    }
+  });
+
+  app.get('/shops/:id', async (req, res) => {
+    const { id } = req.params;
+    if (await verification(req, res)) {
+      try {
+        const shops = await Shop.findOne({ _id: id });
+        return res.send(shops);
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
     }
   });
 
@@ -59,6 +73,7 @@ module.exports = app => {
         shop.coordinate = coordinate;
         shop.entity = entity;
         shop.isHidden = isHidden;
+        shop.isActive = false;
         await shop.save();
         return res.send(shop);
       } catch (e) {
@@ -87,6 +102,28 @@ module.exports = app => {
         return res.send(shop);
       } catch (e) {
         res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
+  app.put('/shops/:id/set-active', async (req, res) => {
+    if (await verification(req, res)) {
+      try {
+        const { id } = req.params;
+        const { value } = req.body;
+        if ( !id ) {
+          return res.status(400).send('id не найдено');
+        }
+
+        const { tokenUser: { accountType } } = req;
+        if (accountType === barista) {
+          await Shop.updateOne({ _id: id }, { $set: { isActive: value } });
+          const shop = await Shop.findOne({ _id: id });
+          return res.send(shop);
+        }
+        return res.status(400).send({'error': 'An error has occurred'});
+      } catch (e) {
+        return res.status(400).send({'error': 'An error has occurred'});
       }
     }
   });

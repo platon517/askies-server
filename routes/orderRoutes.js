@@ -120,7 +120,12 @@ module.exports = app => {
         .catch(err => console.log(err));
     };
 
-    await generateNumber();
+    const selectedShop = await Shop.findOne({ _id: shop });
+    if (selectedShop.isActive) {
+      await generateNumber();
+    } else {
+      res.status(400).send('Кофейня закрыта');
+    }
   });
 
   app.delete("/orders/:id", async (req, res) => {

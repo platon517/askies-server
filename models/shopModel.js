@@ -23,7 +23,10 @@ const shopSchema = mongoose.Schema({
   isHidden: {
     type: Boolean,
     required: true
-  }
+  },
+  isActive: {
+    type: Boolean,
+  },
 });
 
 const Shop = module.exports = mongoose.model('Shop', shopSchema);

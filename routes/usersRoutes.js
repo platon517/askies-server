@@ -81,7 +81,7 @@ module.exports = app => {
           login: user.login,
           accountType: user.accountType,
           entity: user.entity,
-          shop: user.entity,
+          shop: user.shop,
           token
         });
       } else {

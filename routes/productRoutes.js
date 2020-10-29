@@ -43,6 +43,45 @@ module.exports = app => {
     return res.status(400).send('auth error')
   });
 
+  app.put("/products/:id", upload.single("image"), async (req, res) => {
+    if (await adminVerify(req, res)) {
+      const { id } = req.params;
+      const { name, description, price, category, shop, options } = req.body;
+      const updateData = {};
+      if (!id) {
+        res.status(400).send('no id provided');
+      }
+      try {
+        if (name) {
+          updateData.name = name;
+        }
+        if (description) {
+          updateData.description = description;
+        }
+        if (price) {
+          updateData.price = price;
+        }
+        if (category) {
+          updateData.category = category;
+        }
+        if (shop) {
+          updateData.shop = shop;
+        }
+        if (options) {
+          updateData.options = options.split(',');
+        }
+        if (req.file) {
+          updateData.img = req.file.location;
+        }
+        await Product.updateOne({ _id: id }, { $set: updateData });
+        const product = await Product.findOne({ _id: id });
+        res.send(product);
+      } catch (e) {
+        res.status(400).send('errord');
+      }
+    }
+  });
+
   app.get("/barista/products", async (req, res) => {
     const { skip, limit, search = ''} = req.query;
     if (await verification(req, res)) {
@@ -163,7 +202,7 @@ module.exports = app => {
           newVolumes.push(newVolume._id);
         }
 
-        await Product.update({ _id: id }, { $push: { volumes: newVolumes } });
+        await Product.update({ _id: id }, { $set: { volumes: newVolumes } });
 
         const product = await Product.findOne({ _id: id }).populate('volumes').populate('options').exec();
 
