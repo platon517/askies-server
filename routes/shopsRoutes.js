@@ -52,7 +52,7 @@ module.exports = app => {
           .populate('options', null, { hidden: false })
           .populate('category')
           .sort({
-            _id: -1
+            order: 1
           })
           .exec();
       return res.send(products);
