@@ -70,7 +70,7 @@ module.exports = app => {
         if (req.file) {
           updateData.img = req.file.location;
         }
-        updateData.options = options.split(',');
+        updateData.options = options ? options.split(',') : [];
         await Product.updateOne({ _id: id }, { $set: updateData });
         const product = await Product.findOne({ _id: id });
         res.send(product);
