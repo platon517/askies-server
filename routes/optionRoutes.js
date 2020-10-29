@@ -27,7 +27,7 @@ module.exports = app => {
           filter.shop = shop
         }
         const options = await Option.find(filter)
-          .sort({ name: 1 })
+          .sort({ _id: 1 })
           .populate('shop')
           .skip(parseFloat(skip))
           .limit(parseFloat(limit));
