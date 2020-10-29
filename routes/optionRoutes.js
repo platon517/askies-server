@@ -21,12 +21,13 @@ module.exports = app => {
     if (await adminVerify(req, res)) {
       try {
         const totalOptions =
-          await Option.find({}).sort({ name: 1 });
+          await Option.find({});
         const filter = { name: {$regex : `.*${search}.*`, $options:'i'} };
         if (shop) {
           filter.shop = shop
         }
         const options = await Option.find(filter)
+          .sort({ name: 1 })
           .populate('shop')
           .skip(parseFloat(skip))
           .limit(parseFloat(limit));
