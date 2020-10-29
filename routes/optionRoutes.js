@@ -99,6 +99,7 @@ module.exports = app => {
         option.name = name;
         option.extraPrice = extraPrice;
         option.shop = shop;
+        option.hidden = false;
         await option.save();
         return res.send(option);
       } catch (e) {
