@@ -21,7 +21,7 @@ module.exports = app => {
     if (await adminVerify(req, res)) {
       try {
         const totalOptions =
-          await Option.find({});
+          await Option.find({}).sort({ name: 1 });
         const filter = { name: {$regex : `.*${search}.*`, $options:'i'} };
         if (shop) {
           filter.shop = shop
