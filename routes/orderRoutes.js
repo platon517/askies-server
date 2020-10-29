@@ -97,7 +97,6 @@ module.exports = app => {
         },
         "capture": false,
         "description": `Заказ #${number}`,
-        "save_payment_method": true,
       }, {
         headers: {
           'Idempotence-Key' : uniqid(),
