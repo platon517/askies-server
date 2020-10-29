@@ -25,7 +25,7 @@ module.exports = app => {
             .populate('options')
             .populate('shop')
             .sort({
-              _id: -1
+              order: 1
             })
             .skip(parseFloat(skip))
             .limit(parseFloat(limit))
@@ -41,6 +41,24 @@ module.exports = app => {
       }
     }
     return res.status(400).send('auth error')
+  });
+
+  app.put('/products/:id/set-order', async (req, res) => {
+    if (await adminVerify(req, res)) {
+      try {
+        const { id } = req.params;
+        const { order } = req.body;
+        if ( !id ) {
+          return res.status(400).send('id не найдено');
+        }
+
+        await Product.update({ _id: id }, { $set: { order } });
+        const product = await Product.findOne({ _id: id });
+        return res.send(product);
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
   });
 
   app.put("/products/:id", upload.single("image"), async (req, res) => {

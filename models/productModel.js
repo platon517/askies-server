@@ -45,6 +45,10 @@ const productSchema = mongoose.Schema({
   },
   hidden: {
     type: Boolean
+  },
+  order: {
+    type: Number,
+    required: false
   }
 });
 
