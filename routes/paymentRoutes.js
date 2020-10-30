@@ -66,9 +66,7 @@ module.exports = app => {
     if (req.body.event === 'payment.waiting_for_capture') {
       try {
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
-        console.log(1);
-        const order = await Order.findOne({ paymentId: req.body.object.id });
-        console.log(2);
+        const order = await Order.findOne({ paymentId: req.body.object.id }).populate('shop');
         const { payment_method } = req.body.object;
         if (payment_method.saved && payment_method.type === 'bank_card') {
           const user = await AppUser.findOne({ _id: order.appUser });
@@ -79,14 +77,14 @@ module.exports = app => {
                 $push: {
                   paymentMethods: {
                     paymentId: payment_method.id,
-                    card: payment_method.card
+                    card: payment_method.card,
+                    entity: order.shop.entity
                   }
                 }
               }
             );
           }
         }
-        console.log(3);
         return res.send('ok');
       } catch (e) {
         return res.status(400).send('Ошибка');

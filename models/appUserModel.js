@@ -25,6 +25,11 @@ const appUserSchema = mongoose.Schema({
       card: {
         type: Object,
         required: true
+      },
+      entity: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Entity',
+        required: true
       }
     }],
     select: false
