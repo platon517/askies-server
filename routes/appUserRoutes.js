@@ -86,13 +86,14 @@ module.exports = app => {
       return res.status(400).send('Пользователь не найден');
     }
     try {
+      console.log(appUser);
       let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
       if (user.paymentMethods) {
         const paymentMethods = user.paymentMethods.map(method => ({ _id: method._id, card: method.card }));
         return res.send(paymentMethods);
       }
       return res.send([]);
-    } catch (e) {
+    } catch (error) {
       return res.status(400).send('error');
     }
   });
