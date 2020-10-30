@@ -168,7 +168,9 @@ module.exports = app => {
 
         product.name = name;
         product.price = price;
-        product.img = req.file.location;
+        if (req.file) {
+          product.img = req.file.location;
+        }
         product.category = category;
         product.description = description;
         product.shop = shop;
