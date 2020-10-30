@@ -183,6 +183,7 @@ module.exports = app => {
           password: entity.kassaApiToken
         }
       }).then(async response => {
+        //console.log(response.data);
         if ( response.data.status === 'succeeded' ) {
           await Order.updateOne({ _id: id }, { $set: { status: ACCEPTED } });
 

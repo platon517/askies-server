@@ -61,6 +61,11 @@ module.exports = app => {
     }
   });
 
+  app.post('/payments/notifications', async (req, res) => {
+    console.log(req.body);
+    return res.send('ok');
+  });
+
   app.delete('/payments/:id', async (req, res) => {
     if (await adminVerify(req, res)) {
       const { id } = req.params;
