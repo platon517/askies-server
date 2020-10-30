@@ -63,6 +63,7 @@ module.exports = app => {
   });
 
   app.post('/payments/notifications', async (req, res) => {
+    console.log(req.body);
     if (req.body.event === 'payment.waiting_for_capture') {
       try {
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
@@ -83,8 +84,6 @@ module.exports = app => {
               }
             );
           }
-          const resultUser = await AppUser.findOne({ _id: order.appUser });
-          console.log(resultUser);
         }
         return res.send('ok');
       } catch (e) {
