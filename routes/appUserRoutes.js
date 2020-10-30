@@ -82,13 +82,17 @@ module.exports = app => {
 
   app.get('/payment-methods/:appUser', async (req, res) => {
     const { appUser } = req.params;
+    const { entity } = req.query;
     if (!appUser) {
       return res.status(400).send('Пользователь не найден');
     }
     try {
       let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
       if (user.paymentMethods) {
-        const paymentMethods = user.paymentMethods.map(method => ({ _id: method._id, card: method.card }));
+        const paymentMethods =
+          user.paymentMethods
+            .filter(method => method.entity === entity)
+            .map(method => ({ _id: method._id, card: method.card }));
         return res.send(paymentMethods);
       }
       return res.send([]);
