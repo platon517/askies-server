@@ -88,13 +88,11 @@ module.exports = app => {
     }
     try {
       let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
-      console.log(user, entity);
       if (user.paymentMethods) {
         const paymentMethods =
-          user.paymentMethods
-            .filter(method => (entity.equals(method.entity)))
+          user.toObject().paymentMethods
+            .filter(method => (method.entity === entity))
             .map(method => ({ _id: method._id, card: method.card }));
-        console.log(paymentMethods);
         return res.send(paymentMethods);
       }
       return res.send([]);
