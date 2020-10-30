@@ -64,6 +64,7 @@ module.exports = app => {
   app.post('/payments/notifications', async (req, res) => {
     if (req.body.event === 'payment.waiting_for_capture') {
       try {
+        console.log(req.body);
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
         return res.send('ok');
       } catch (e) {
