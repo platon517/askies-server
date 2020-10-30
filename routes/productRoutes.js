@@ -156,7 +156,7 @@ module.exports = app => {
     if (await adminVerify(req, res)) {
       const { name, description, price, category, shop, options } = req.body;
 
-      if ( !name || !price || !category || !req.file || !shop) {
+      if ( !name || !price || !category || !shop) {
         if (req.file.location) {
           await deleteImage(req.file.location);
         }
