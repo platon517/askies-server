@@ -92,7 +92,7 @@ module.exports = app => {
       if (user.paymentMethods) {
         const paymentMethods =
           user.paymentMethods
-            .filter(method => method.entity.equals(entity))
+            .filter(method => method.entity === entity)
             .map(method => ({ _id: method._id, card: method.card }));
         return res.send(paymentMethods);
       }
