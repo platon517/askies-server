@@ -86,13 +86,27 @@ module.exports = app => {
       return res.status(400).send('Пользователь не найден');
     }
     try {
-      console.log(appUser);
       let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
       if (user.paymentMethods) {
         const paymentMethods = user.paymentMethods.map(method => ({ _id: method._id, card: method.card }));
         return res.send(paymentMethods);
       }
       return res.send([]);
+    } catch (error) {
+      return res.status(400).send('error');
+    }
+  });
+
+  app.delete('/payment-methods/:appUser/:id', async (req, res) => {
+    const { appUser, id } = req.params;
+    if (!appUser) {
+      return res.status(400).send('Пользователь не найден');
+    }
+    try {
+      await AppUser.updateOne({ _id: appUser }, { $pull: { paymentMethods: { _id: id } } });
+      let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
+      const paymentMethods = user.paymentMethods.map(method => ({ _id: method._id, card: method.card }));
+      return res.send(paymentMethods);
     } catch (error) {
       return res.status(400).send('error');
     }
