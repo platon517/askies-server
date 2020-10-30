@@ -62,8 +62,14 @@ module.exports = app => {
   });
 
   app.post('/payments/notifications', async (req, res) => {
-    console.log(req.body);
-    return res.send('ok');
+    if (req.body.event === 'payment.waiting_for_capture') {
+      try {
+        await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
+        return res.send('ok');
+      } catch (e) {
+        return res.status(400).send('Ошибка');
+      }
+    }
   });
 
   app.delete('/payments/:id', async (req, res) => {
