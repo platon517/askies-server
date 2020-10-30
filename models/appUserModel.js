@@ -15,6 +15,18 @@ const appUserSchema = mongoose.Schema({
   },
   pushToken: {
     type: String,
+  },
+  paymentMethods: {
+    type: [{
+      paymentId: {
+        type: String,
+        required: true
+      },
+      card: {
+        type: Object,
+        required: true
+      }
+    }]
   }
 });
 
