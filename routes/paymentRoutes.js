@@ -63,15 +63,16 @@ module.exports = app => {
   });
 
   app.post('/payments/notifications', async (req, res) => {
-    console.log(req.body);
     if (req.body.event === 'payment.waiting_for_capture') {
       try {
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
+        console.log(1);
         const order = await Order.findOne({ paymentId: req.body.object.id });
+        console.log(2);
         const { payment_method } = req.body.object;
         if (payment_method.saved && payment_method.type === 'bank_card') {
           const user = await AppUser.findOne({ _id: order.appUser });
-          if (!user.paymentMethods.find(method => method.paymentId === payment_method.id)) {
+          if (!user.paymentMethods || !user.paymentMethods.find(method => method.paymentId === payment_method.id)) {
             await AppUser.updateOne(
               { _id: order.appUser },
               {
@@ -85,6 +86,7 @@ module.exports = app => {
             );
           }
         }
+        console.log(3);
         return res.send('ok');
       } catch (e) {
         return res.status(400).send('Ошибка');
