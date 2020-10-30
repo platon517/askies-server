@@ -64,8 +64,15 @@ module.exports = app => {
   app.post('/shops', async (req, res) => {
     if (await adminVerify(req, res)) {
       try {
-        const { address, coordinate, entity, isHidden } = req.body;
-        if ( !coordinate.latitude || !coordinate.longitude || !address || !entity || (isHidden === undefined) ) {
+        const { address, coordinate, entity, isHidden, commission } = req.body;
+        if (
+          !coordinate.latitude ||
+          !coordinate.longitude ||
+          !address ||
+          !entity ||
+          (isHidden === undefined) ||
+          (commission === undefined)
+        ) {
           return res.status(400).send('Заполните все поля');
         }
         const shop = new Shop();
@@ -74,6 +81,7 @@ module.exports = app => {
         shop.entity = entity;
         shop.isHidden = isHidden;
         shop.isActive = false;
+        shop.commission = commission;
         await shop.save();
         return res.send(shop);
       } catch (e) {

@@ -27,6 +27,10 @@ const shopSchema = mongoose.Schema({
   isActive: {
     type: Boolean,
   },
+  commission: {
+    type: String,
+    required: true
+  }
 });
 
 const Shop = module.exports = mongoose.model('Shop', shopSchema);

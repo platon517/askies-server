@@ -3,7 +3,6 @@ const Order = require('../models/orderModel');
 const Shop = require('../models/shopModel');
 const Payment = require('../models/paymentModel');
 const adminVerify = require('../helpers/adminVerify');
-const yandexKassaPercent =  require("../constants/yandexKassaPercent");
 
 module.exports = app => {
 
@@ -16,7 +15,7 @@ module.exports = app => {
         for (let entity of entities) {
           const entityObj = entity.toObject();
           const shops = await Shop.find({ entity: entity._id });
-          const orders = await Order.find({ shop: { $in: shops.map(shop => shop._id) }, paid: true });
+          const orders = await Order.find({ shop: { $in: shops.map(shop => shop._id) }, paid: true }).populate('shop');
           const payments = await Payment.find({ entity: entity._id });
           entityObj.processedPaymentsSum = payments
             .reduce((acc, payment) => {
@@ -25,9 +24,10 @@ module.exports = app => {
             }, 0).toFixed(2);
           entityObj.totalPaymentsSum = (orders
             .reduce((acc, order) => {
-              acc += parseFloat(order.sum);
+              console.log(order);
+              acc += (parseFloat(order.sum) * (parseFloat(order.shop.commission || 0) / 100));
               return acc;
-            }, 0) * (1 - yandexKassaPercent)).toFixed(2);
+            }, 0)).toFixed(2);
           entityObj.waitingPaymentsSum =
             (parseFloat(entityObj.totalPaymentsSum) - parseFloat(entityObj.processedPaymentsSum)).toFixed(2);
 
