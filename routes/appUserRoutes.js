@@ -88,7 +88,7 @@ module.exports = app => {
     }
     try {
       let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
-      console.log(user);
+      console.log(user, entity);
       if (user.paymentMethods) {
         const paymentMethods =
           user.paymentMethods
