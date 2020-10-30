@@ -74,11 +74,23 @@ module.exports = app => {
 
     try {
       await AppUser.updateOne({ _id: appUser }, { $set: { pushToken: token } });
-      console.log('token:', token);
       return res.send(token);
     } catch (e) {
       return res.status(400).send('Ошибка')
     }
+  });
+
+  app.get('/payment-methods/:appUser', async (req, res) => {
+    const { appUser } = req.params;
+    let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
+
+    if (!appUser) {
+      return res.status(400).send('Пользователь не найден');
+    }
+
+    const paymentMethods = user.paymentMethods.map(method => ({ _id: method._id, card: method.card }));
+
+    res.send(paymentMethods);
   });
 
 };

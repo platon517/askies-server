@@ -26,7 +26,8 @@ const appUserSchema = mongoose.Schema({
         type: Object,
         required: true
       }
-    }]
+    }],
+    select: false
   }
 });
 
