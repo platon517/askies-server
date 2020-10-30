@@ -87,9 +87,11 @@ module.exports = app => {
     }
     try {
       let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
-      const paymentMethods = user.paymentMethods.map(method => ({ _id: method._id, card: method.card }));
-
-      return res.send(paymentMethods);
+      if (user.paymentMethods) {
+        const paymentMethods = user.paymentMethods.map(method => ({ _id: method._id, card: method.card }));
+        return res.send(paymentMethods);
+      }
+      return res.send([]);
     } catch (e) {
       return res.status(400).send('error');
     }
