@@ -71,7 +71,11 @@ const orderSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PromoCode',
     required: false
-  }
+  },
+  discountValue: {
+    type: String,
+    required: false
+  },
 });
 
 orderSchema.pre('save', async function(next) {
@@ -98,6 +102,7 @@ orderSchema.pre('save', async function(next) {
   }
   if (this.promoCode) {
     const promoCode = await PromoCode.findOne({ _id: this.promoCode._id });
+    this.discountValue = promoCode.discountValue;
     sum = sum * ((100 - promoCode.discountValue) / 100)
   }
   sum = Math.ceil(sum);

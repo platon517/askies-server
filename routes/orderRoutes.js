@@ -171,7 +171,7 @@ module.exports = app => {
           tasks.sort((a, b) => {
             const aTime = (new Date(a.date)).getTime() + parseFloat(a.time) * 60 * 1000 - Date.now();
             const bTime = (new Date(b.date)).getTime() + parseFloat(b.time) * 60 * 1000 - Date.now();
-            return aTime - bTime;
+            return bTime - aTime;
           })
         )
       } catch (e) {
