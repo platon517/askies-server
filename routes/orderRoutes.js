@@ -16,12 +16,16 @@ module.exports = app => {
 
   app.get("/orders", async (req, res) => {
     if (await adminVerify(req, res)) {
-      const { skip, limit, search = '' } = req.query;
+      const { skip, limit, search = '', shop } = req.query;
 
       try {
         const totalOrders = await Order.find({});
+        const filter = { number: {$regex : `.*${search}.*`, $options:'i'} };
+        if (shop) {
+          filter.shop = shop
+        }
         const orders = await Order
-          .find({ number: {$regex : `.*${search}.*`, $options:'i'} })
+          .find(filter)
           .populate('shop')
           .populate('products.product')
           .populate('products.options')
