@@ -97,7 +97,7 @@ module.exports = app => {
           "currency": "RUB"
         },
         "confirmation": {
-          "type": "embedded",
+          "type": paymentMethod ? "external" : "embedded",
         },
         "capture": false,
         "payment_method_id": paymentMethod ? paymentMethod.paymentId : '',
