@@ -30,6 +30,10 @@ const shopSchema = mongoose.Schema({
   commission: {
     type: String,
     required: true
+  },
+  img: {
+    type: String,
+    required: false
   }
 });
 

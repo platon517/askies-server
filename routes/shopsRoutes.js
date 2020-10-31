@@ -4,6 +4,7 @@ const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
 const adminVerify = require('../helpers/adminVerify');
 const verification = require('../helpers/verification');
+const { upload, deleteImage } = require('../helpers/upload');
 const { admin, entityAdmin, barista } = require('../constants/accountTypes');
 
 module.exports = app => {
@@ -90,23 +91,44 @@ module.exports = app => {
     }
   });
 
-  app.put('/shops/:id', async (req, res) => {
+  app.put('/shops/:id', upload.single("image"), async (req, res) => {
     if (await adminVerify(req, res)) {
       try {
         const { id } = req.params;
-        const { isHidden } = req.body;
+        const { isHidden, address, coordinate, entity, commission } = req.body;
         if ( !id ) {
           return res.status(400).send('id не найдено');
         }
 
         const shop = await Shop.findOne({ _id: id });
-        const entity = await Entity.findOne({ _id: shop.entity });
+        const targetEntity = await Entity.findOne({ _id: shop.entity });
 
-        if (!entity.kassaShopId || !entity.kassaApiToken) {
+        if (!targetEntity.kassaShopId || !targetEntity.kassaApiToken) {
           return res.status(400).send('Касса не подключена');
         }
 
-        await Shop.update({ _id: id }, { $set: { isHidden } });
+        const updateData = {};
+
+        if (isHidden !== undefined) {
+          updateData.isHidden = isHidden;
+        }
+        if (req.file) {
+          updateData.img = req.file.location;
+        }
+        if (address !== undefined) {
+          updateData.address = address;
+        }
+        if (coordinate !== undefined) {
+          updateData.coordinate = JSON.parse(coordinate);
+        }
+        if (entity !== undefined) {
+          updateData.entity = entity;
+        }
+        if (commission !== undefined) {
+          updateData.commission = commission;
+        }
+
+        await Shop.update({ _id: id }, { $set: updateData });
         return res.send(shop);
       } catch (e) {
         res.status(400).send({'error': 'An error has occurred'});
