@@ -166,14 +166,9 @@ module.exports = app => {
           .populate('shop')
           .populate('products.product')
           .populate('products.options')
-          .populate('products.volume');
-        res.send(
-          tasks.sort((a, b) => {
-            const aTime = (new Date(a.date)).getTime() + parseFloat(a.time) * 60 * 1000 - Date.now();
-            const bTime = (new Date(b.date)).getTime() + parseFloat(b.time) * 60 * 1000 - Date.now();
-            return bTime - aTime;
-          })
-        )
+          .populate('products.volume')
+          .sort('-date');
+        res.send(tasks);
       } catch (e) {
         res.status(400).send({
           error: 'Ошибка при получении задач'
