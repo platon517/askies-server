@@ -116,7 +116,7 @@ module.exports = app => {
         updates.paymentId = response.data.id;
         updates.paid = false;
         if (!paymentMethod) {
-          updates.confirmationToken = response.data.confirmation.confirmation_token,
+          updates.confirmationToken = response.data.confirmation.confirmation_token;
         }
         await Order.updateOne({ _id: savedOrder._id }, { $set: updates });
 
