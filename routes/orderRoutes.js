@@ -98,6 +98,7 @@ module.exports = app => {
         },
         "confirmation": {
           "type": paymentMethod ? "redirect" : "embedded",
+          "return_url": "https://success.vendetta-coffee.ru"
         },
         "capture": false,
         "payment_method_id": paymentMethod ? paymentMethod.paymentId : '',
