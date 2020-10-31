@@ -122,7 +122,9 @@ module.exports = app => {
 
         const result = {};
         result._id = savedOrder._id;
-        result.confirmationToken = response.data.confirmation.confirmation_token;
+        if (!paymentMethod) {
+          result.confirmationToken = response.data.confirmation.confirmation_token;
+        }
         return res.send(result);
       })
         .catch(err => console.log(err));
