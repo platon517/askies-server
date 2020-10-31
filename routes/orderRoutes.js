@@ -91,7 +91,7 @@ module.exports = app => {
 
       const paymentMethod = user.paymentMethods.find(method => method._id.equals(savedMethodId));
 
-      axios.post(`/payments/`, {
+      const data = {
         "amount": {
           "value": savedOrder.sum,
           "currency": "RUB"
@@ -101,9 +101,14 @@ module.exports = app => {
           "return_url": "https://success.vendetta-coffee.ru"
         },
         "capture": false,
-        "payment_method_id": paymentMethod ? paymentMethod.paymentId : '',
         "description": `Заказ #${number}`,
-      }, {
+      };
+
+      if (paymentMethod) {
+        data.payment_method_id = paymentMethod.paymentId;
+      }
+
+      axios.post(`/payments/`, data, {
         headers: {
           'Idempotence-Key' : uniqid(),
         },
