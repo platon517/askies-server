@@ -167,7 +167,7 @@ module.exports = app => {
           .populate('products.product')
           .populate('products.options')
           .populate('products.volume')
-          .sort('createdAt');
+          .sort('-createdAt');
         res.send(tasks);
       } catch (e) {
         res.status(400).send({
