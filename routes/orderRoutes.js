@@ -5,6 +5,7 @@ const sendNotification = require('../helpers/sendNotification');
 const Order = require('../models/orderModel');
 const Shop = require('../models/shopModel');
 const Entity = require('../models/entityModel');
+const AppUser = require('../models/appUserModel');
 const uniqid = require('uniqid');
 
 axios.defaults.baseURL = 'https://payment.yandex.net/api/v3';
@@ -46,7 +47,7 @@ module.exports = app => {
   });
 
   app.post("/orders", async (req, res) => {
-    const { products, shop, waitTime, appUser, promoCode } = req.body;
+    const { products, shop, waitTime, appUser, promoCode, savedMethodId = null } = req.body;
 
     let number;
 
@@ -75,6 +76,7 @@ module.exports = app => {
       order.createdAt = new Date();
       order.status = WAITING;
 
+      const appUser = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
       const shopObj = await Shop.findOne({ _id: shop });
       const entity = await Entity.findOne({ _id: shopObj.entity });
 
@@ -87,6 +89,8 @@ module.exports = app => {
       await order.save();
       const savedOrder = await Order.findOne({ _id: order._id }).populate('products.product');
 
+      const paymentMethod = appUser.paymentMethods.find(method => method._id.equals(savedMethodId));
+
       axios.post(`/payments/`, {
         "amount": {
           "value": savedOrder.sum,
@@ -96,6 +100,7 @@ module.exports = app => {
           "type": "embedded",
         },
         "capture": false,
+        "payment_method_id": paymentMethod ? paymentMethod.paymentId : '',
         "description": `Заказ #${number}`,
       }, {
         headers: {
