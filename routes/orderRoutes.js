@@ -76,7 +76,7 @@ module.exports = app => {
       order.createdAt = new Date();
       order.status = WAITING;
 
-      const appUser = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
+      const user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
       const shopObj = await Shop.findOne({ _id: shop });
       const entity = await Entity.findOne({ _id: shopObj.entity });
 
@@ -89,7 +89,7 @@ module.exports = app => {
       await order.save();
       const savedOrder = await Order.findOne({ _id: order._id }).populate('products.product');
 
-      const paymentMethod = appUser.paymentMethods.find(method => method._id.equals(savedMethodId));
+      const paymentMethod = user.paymentMethods.find(method => method._id.equals(savedMethodId));
 
       axios.post(`/payments/`, {
         "amount": {
