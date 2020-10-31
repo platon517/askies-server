@@ -112,15 +112,18 @@ module.exports = app => {
           password: entity.kassaApiToken
         }
       }).then(async response => {
-        await Order.updateOne({ _id: savedOrder._id }, { $set: {
-            confirmationToken: response.data.confirmation.confirmation_token,
-            paymentId: response.data.id,
-            paid: false
-          } });
-        return res.send({
-          _id: savedOrder._id,
-          confirmationToken: response.data.confirmation.confirmation_token,
-        });
+        const updates = {};
+        updates.paymentId = response.data.id;
+        updates.paid = false;
+        if (!paymentMethod) {
+          updates.confirmationToken = response.data.confirmation.confirmation_token,
+        }
+        await Order.updateOne({ _id: savedOrder._id }, { $set: updates });
+
+        const result = {};
+        result._id = savedOrder._id;
+        result.confirmationToken = response.data.confirmation.confirmation_token;
+        return res.send(result);
       })
         .catch(err => console.log(err));
     };
