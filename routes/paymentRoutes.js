@@ -69,7 +69,7 @@ module.exports = app => {
         const order = await Order.findOne({ paymentId: req.body.object.id }).populate('shop');
         const { payment_method } = req.body.object;
         if (payment_method.saved && payment_method.type === 'bank_card') {
-          const user = await AppUser.findOne({ _id: order.appUser });
+          const user = await AppUser.findOne({ _id: order.appUser }).select('+paymentMethods');
           if (!user.paymentMethods || !user.paymentMethods.find(method => method.paymentId === payment_method.id)) {
             await AppUser.updateOne(
               { _id: order.appUser },
