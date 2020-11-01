@@ -83,7 +83,7 @@ module.exports = app => {
                   sound: 'default',
                   title: 'Поступил новый заказ',
                   body: `Номер заказа: ${order.number}`,
-                  //data: { type: 'ORDER', orderId: order._id },
+                  data: { type: 'BARISTA_ORDER' },
                   priority: 'high'
                 });
               }
