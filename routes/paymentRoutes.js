@@ -71,16 +71,18 @@ module.exports = app => {
 
         if (order.shop.employeesPhoneNumbers) {
           order.shop.employeesPhoneNumbers.map(async (phone) => {
-            const appUser = await AppUser.findOne({ phone: phone.number });
-            if (appUser && appUser.pushToken) {
-              await sendNotification({
-                to: appUser.pushToken,
-                sound: 'default',
-                title: 'Поступил новый заказ',
-                body: `Номер заказа: ${order.number}`,
-                //data: { type: 'ORDER', orderId: order._id },
-                priority: 'high'
-              });
+            if (phone.isActive) {
+              const appUser = await AppUser.findOne({ phone: phone.number });
+              if (appUser && appUser.pushToken) {
+                await sendNotification({
+                  to: appUser.pushToken,
+                  sound: 'default',
+                  title: 'Поступил новый заказ',
+                  body: `Номер заказа: ${order.number}`,
+                  //data: { type: 'ORDER', orderId: order._id },
+                  priority: 'high'
+                });
+              }
             }
           });
         }
