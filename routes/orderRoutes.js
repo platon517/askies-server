@@ -217,7 +217,9 @@ module.exports = app => {
             error: 'Ошибка оплаты'
           });
         }
-      }, error => {
+      }, async error => {
+        console.log(error.response.data);
+        await Order.updateOne({ _id: id }, { $set: { status: WAITING } });
         return res.status(400).send({
           error: 'Ошибка'
         });
@@ -269,6 +271,7 @@ module.exports = app => {
           });
         }
       }, async error => {
+        console.log(error.response.data);
         await Order.updateOne({ _id: id }, { $set: { status: WAITING } });
         return res.status(400).send({
           error: 'Ошибка'
