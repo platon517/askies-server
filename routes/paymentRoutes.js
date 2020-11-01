@@ -69,7 +69,7 @@ module.exports = app => {
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
         const order = await Order.findOne({ paymentId: req.body.object.id }).populate('shop');
 
-        /*if (order.shop.employeesPhoneNumbers) {
+        if (order.shop.employeesPhoneNumbers) {
           order.shop.employeesPhoneNumbers.map(async (phone) => {
             if (phone.isActive) {
               const appUser = await AppUser.findOne({ phone: phone.number });
@@ -85,7 +85,7 @@ module.exports = app => {
               }
             }
           });
-        }*/
+        }
         const { payment_method } = req.body.object;
         if (payment_method.saved && payment_method.type === 'bank_card') {
           const user = await AppUser.findOne({ _id: order.appUser }).select('+paymentMethods');
