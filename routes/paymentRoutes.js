@@ -67,7 +67,8 @@ module.exports = app => {
     if (req.body.event === 'payment.waiting_for_capture') {
       try {
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
-        const order = await Order.findOne({ paymentId: req.body.object.id }).populate('shop');
+        const order =
+          await Order.findOne({ paymentId: req.body.object.id }).populate('shop').select('+shop.employeesPhoneNumbers');
 
         if (order.shop.employeesPhoneNumbers) {
           order.shop.employeesPhoneNumbers.map(async (phone) => {
