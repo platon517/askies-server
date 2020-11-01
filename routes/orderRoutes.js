@@ -182,136 +182,142 @@ module.exports = app => {
   });
 
   app.post("/tasks/:id/accept", async (req, res) => {
-    const { id } = req.params;
+    if (await verification(req, res)) {
+      const { id } = req.params;
 
-    try {
-      const order = await Order.findOne({ _id: id }).populate('appUser');
-      const shopObj = await Shop.findOne({ _id: order.shop });
-      const entity = await Entity.findOne({ _id: shopObj.entity });
+      try {
+        const order = await Order.findOne({ _id: id }).populate('appUser');
+        const shopObj = await Shop.findOne({ _id: order.shop });
+        const entity = await Entity.findOne({ _id: shopObj.entity });
 
-      axios.post(`/payments/${order.paymentId}/capture/`, {}, {
-        headers: {
-          'Idempotence-Key' : uniqid(),
-        },
-        auth: {
-          username: entity.kassaShopId,
-          password: entity.kassaApiToken
-        }
-      }).then(async response => {
-        //console.log(response.data);
-        if ( response.data.status === 'succeeded' ) {
-          await Order.updateOne({ _id: id }, { $set: { status: ACCEPTED } });
+        axios.post(`/payments/${order.paymentId}/capture/`, {}, {
+          headers: {
+            'Idempotence-Key' : uniqid(),
+          },
+          auth: {
+            username: entity.kassaShopId,
+            password: entity.kassaApiToken
+          }
+        }).then(async response => {
+          //console.log(response.data);
+          if ( response.data.status === 'succeeded' ) {
+            await Order.updateOne({ _id: id }, { $set: { status: ACCEPTED } });
 
-          await sendNotification({
-            to: order.appUser.pushToken,
-            sound: 'default',
-            title: 'Заказ подтвержден',
-            body: `Номер заказа: ${order.number}`,
-            data: { type: 'ORDER', orderId: order._id },
-            priority: 'high'
-          });
+            await sendNotification({
+              to: order.appUser.pushToken,
+              sound: 'default',
+              title: 'Заказ подтвержден',
+              body: `Номер заказа: ${order.number}`,
+              data: { type: 'ORDER', orderId: order._id },
+              priority: 'high'
+            });
 
-          return res.send(order);
-        } else {
+            return res.send(order);
+          } else {
+            return res.status(400).send({
+              error: 'Ошибка оплаты'
+            });
+          }
+        }, async error => {
+          console.log(error.response.data);
+          await Order.updateOne({ _id: id }, { $set: { status: WAITING } });
           return res.status(400).send({
-            error: 'Ошибка оплаты'
+            error: 'Ошибка'
           });
-        }
-      }, async error => {
-        console.log(error.response.data);
-        await Order.updateOne({ _id: id }, { $set: { status: WAITING } });
-        return res.status(400).send({
+        });
+      } catch (e) {
+        res.status(400).send({
           error: 'Ошибка'
         });
-      });
-    } catch (e) {
-      res.status(400).send({
-        error: 'Ошибка'
-      });
+      }
     }
-
   });
 
   app.post("/tasks/:id/decline", async (req, res) => {
-    const { id } = req.params;
+    if (await verification(req, res)) {
+      const { id } = req.params;
 
-    try {
+      try {
 
-      const order = await Order.findOne({ _id: id }).populate('appUser');
-      const shopObj = await Shop.findOne({ _id: order.shop });
-      const entity = await Entity.findOne({ _id: shopObj.entity });
+        const order = await Order.findOne({ _id: id }).populate('appUser');
+        const shopObj = await Shop.findOne({ _id: order.shop });
+        const entity = await Entity.findOne({ _id: shopObj.entity });
 
-      await Order.updateOne({ _id: id }, { $set: { status: DECLINED } });
+        await Order.updateOne({ _id: id }, { $set: { status: DECLINED } });
 
-      axios.post(`/payments/${order.paymentId}/cancel/`, {}, {
-        headers: {
-          'Idempotence-Key' : uniqid(),
-        },
-        auth: {
-          username: entity.kassaShopId,
-          password: entity.kassaApiToken
-        }
-      }).then(async response => {
-        if ( response.data.status === 'canceled' ) {
+        axios.post(`/payments/${order.paymentId}/cancel/`, {}, {
+          headers: {
+            'Idempotence-Key' : uniqid(),
+          },
+          auth: {
+            username: entity.kassaShopId,
+            password: entity.kassaApiToken
+          }
+        }).then(async response => {
+          if ( response.data.status === 'canceled' ) {
 
-          await sendNotification({
-            to: order.appUser.pushToken,
-            sound: 'default',
-            title: 'Заказ отменен',
-            body: `Ваш заказ был отменен кофейней`,
-            data: { type: 'ORDER', orderId: order._id },
-            priority: 'high'
-          });
+            await sendNotification({
+              to: order.appUser.pushToken,
+              sound: 'default',
+              title: 'Заказ отменен',
+              body: `Ваш заказ был отменен кофейней`,
+              data: { type: 'ORDER', orderId: order._id },
+              priority: 'high'
+            });
 
-          return res.send(order);
-        } else {
+            return res.send(order);
+          } else {
+            await Order.updateOne({ _id: id }, { $set: { status: WAITING } });
+            return res.status(400).send({
+              error: 'Ошибка отмены'
+            });
+          }
+        }, async error => {
+          console.log(error.response.data);
           await Order.updateOne({ _id: id }, { $set: { status: WAITING } });
           return res.status(400).send({
-            error: 'Ошибка отмены'
+            error: 'Ошибка'
           });
-        }
-      }, async error => {
-        console.log(error.response.data);
-        await Order.updateOne({ _id: id }, { $set: { status: WAITING } });
-        return res.status(400).send({
+        });
+
+      } catch (e) {
+        res.status(400).send({
           error: 'Ошибка'
         });
-      });
-
-    } catch (e) {
-      res.status(400).send({
-        error: 'Ошибка'
-      });
+      }
     }
-
   });
 
   app.post("/tasks/:id/complete", async (req, res) => {
-    const { id } = req.params;
+    if (await verification(req, res)) {
+      const {id} = req.params;
 
-    try {
-      await Order.updateOne({ _id: id }, { $set: { status: COMPLETED } });
-      const order = await Order.findOne({ _id: id });
-      res.send(order);
-    } catch (e) {
-      res.status(400).send({
-        error: 'Ошибка'
-      });
+      try {
+        await Order.updateOne({_id: id}, {$set: {status: COMPLETED}});
+        const order = await Order.findOne({_id: id});
+        res.send(order);
+      } catch (e) {
+        res.status(400).send({
+          error: 'Ошибка'
+        });
+      }
     }
 
   });
 
   app.post("/tasks/:id/hide", async (req, res) => {
-    const { id } = req.params;
+    if (await verification(req, res)) {
+      const {id} = req.params;
 
-    try {
-      await Order.updateOne({ _id: id }, { $set: { status: HIDDEN } });
-      const order = await Order.findOne({ _id: id });
-      res.send(order);
-    } catch (e) {
-      res.status(400).send({
-        error: 'Ошибка'
-      });
+      try {
+        await Order.updateOne({_id: id}, {$set: {status: HIDDEN}});
+        const order = await Order.findOne({_id: id});
+        res.send(order);
+      } catch (e) {
+        res.status(400).send({
+          error: 'Ошибка'
+        });
+      }
     }
 
   });
