@@ -4,6 +4,7 @@ const Shop = require('../models/shopModel');
 const Payment = require('../models/paymentModel');
 const AppUser = require('../models/appUserModel');
 const adminVerify = require('../helpers/adminVerify');
+const sendNotification = require('../helpers/sendNotification');
 
 module.exports = app => {
 
@@ -67,6 +68,22 @@ module.exports = app => {
       try {
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
         const order = await Order.findOne({ paymentId: req.body.object.id }).populate('shop');
+
+        if (order.shop.employeesPhoneNumbers) {
+          order.shop.employeesPhoneNumbers.map(async (phone) => {
+            const appUser = await AppUser.findOne({ phone: phone.number });
+            if (appUser && appUser.pushToken) {
+              await sendNotification({
+                to: appUser.pushToken,
+                sound: 'default',
+                title: 'Поступил новый заказ',
+                body: `Номер заказа: ${order.number}`,
+                //data: { type: 'ORDER', orderId: order._id },
+                priority: 'high'
+              });
+            }
+          });
+        }
         const { payment_method } = req.body.object;
         if (payment_method.saved && payment_method.type === 'bank_card') {
           const user = await AppUser.findOne({ _id: order.appUser }).select('+paymentMethods');

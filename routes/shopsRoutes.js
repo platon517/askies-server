@@ -170,4 +170,55 @@ module.exports = app => {
     }
   });
 
+  app.get('/barista/employees', async (req, res) => {
+    if (await verification(req, res)) {
+      try {
+        const { tokenUser: { accountType, shop } } = req;
+        if (accountType !== barista) {
+          return res.status(400).send('Ошибка. Доступно только баристе.');
+        }
+        const targetShop = await Shop.findOne({ _id: shop }).select('+employeesPhoneNumbers');
+        return res.send(targetShop.employeesPhoneNumbers);
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
+  app.post('/barista/employees', async (req, res) => {
+    if (await verification(req, res)) {
+      try {
+        const { tokenUser: { accountType, shop } } = req;
+        if (accountType !== barista) {
+          return res.status(400).send('Ошибка. Доступно только баристе.');
+        }
+        const { number } = req.body;
+        await Shop.updateOne({ _id: shop }, { $push: { employeesPhoneNumbers: { number, isActive: false } } });
+        return res.send('ok');
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
+  app.put('/barista/employees/:id', async (req, res) => {
+    if (await verification(req, res)) {
+      try {
+        const { tokenUser: { accountType, shop } } = req;
+        if (accountType !== barista) {
+          return res.status(400).send('Ошибка. Доступно только баристе.');
+        }
+        const { id } = req.params;
+        const { isActive } = req.body;
+        await Shop.updateOne(
+          { _id: shop, 'employeesPhoneNumbers._id': id },
+          { $set: { 'employeesPhoneNumbers.$.isActive': isActive } }
+        );
+        return res.send('ok');
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
 };

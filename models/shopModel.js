@@ -34,6 +34,18 @@ const shopSchema = mongoose.Schema({
   img: {
     type: String,
     required: false
+  },
+  employeesPhoneNumbers: {
+    type: [{
+      number: {
+        type: String,
+        required: true
+      },
+      isActive: {
+        type: Boolean
+      }
+    }],
+    select: false
   }
 });
 
