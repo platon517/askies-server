@@ -62,10 +62,10 @@ module.exports = app => {
     }
   });
 
-  app.post('/shops', async (req, res) => {
+  app.post('/shops', upload.single("image"), async (req, res) => {
     if (await adminVerify(req, res)) {
       try {
-        const { address, coordinate, entity, isHidden, commission } = req.body;
+        const { address, coordinate, entity, isHidden, commission, color } = req.body;
         if (
           !coordinate.latitude ||
           !coordinate.longitude ||
@@ -78,11 +78,17 @@ module.exports = app => {
         }
         const shop = new Shop();
         shop.address = address;
-        shop.coordinate = coordinate;
+        shop.coordinate = JSON.parse(coordinate);
         shop.entity = entity;
         shop.isHidden = isHidden;
         shop.isActive = false;
         shop.commission = commission;
+        if (color) {
+          shop.color = color;
+        }
+        if (req.file) {
+          shop.img = req.file.location;
+        }
         await shop.save();
         return res.send(shop);
       } catch (e) {
@@ -95,7 +101,7 @@ module.exports = app => {
     if (await adminVerify(req, res)) {
       try {
         const { id } = req.params;
-        const { isHidden, address, coordinate, entity, commission } = req.body;
+        const { isHidden, address, coordinate, entity, commission, color } = req.body;
         if ( !id ) {
           return res.status(400).send('id не найдено');
         }
@@ -126,6 +132,9 @@ module.exports = app => {
         }
         if (commission !== undefined) {
           updateData.commission = commission;
+        }
+        if (color !== undefined) {
+          updateData.color = color;
         }
 
         await Shop.update({ _id: id }, { $set: updateData });

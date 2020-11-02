@@ -35,6 +35,10 @@ const shopSchema = mongoose.Schema({
     type: String,
     required: false
   },
+  color: {
+    type: String,
+    required: false
+  },
   employeesPhoneNumbers: {
     type: [{
       number: {

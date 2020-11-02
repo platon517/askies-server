@@ -71,8 +71,6 @@ module.exports = app => {
           .findOne({ paymentId: req.body.object.id })
           .populate({ path: 'shop', select: '+employeesPhoneNumbers' });
 
-        console.log(order.shop);
-
         if (order.shop.employeesPhoneNumbers) {
           order.shop.employeesPhoneNumbers.map(async (phone) => {
             if (phone.isActive) {
