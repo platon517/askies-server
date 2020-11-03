@@ -1,5 +1,6 @@
 const axios = require('axios');
 const AppUser = require('../models/appUserModel');
+const adminVerify = require('../helpers/adminVerify');
 
 module.exports = app => {
 
@@ -113,6 +114,17 @@ module.exports = app => {
       return res.send(paymentMethods);
     } catch (error) {
       return res.status(400).send('error');
+    }
+  });
+
+  app.get('/app-users/count', async (req, res) => {
+    if (await adminVerify(req, res)) {
+      try {
+        let users = await AppUser.find();
+        return res.send({ count: users.length });
+      } catch (error) {
+        return res.status(400).send('error');
+      }
     }
   });
 

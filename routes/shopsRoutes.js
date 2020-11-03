@@ -22,7 +22,13 @@ module.exports = app => {
 
   app.get('/shops', async (req, res) => {
     try {
-      const shops = await Shop.find({ isHidden: false }).populate('entity').exec();
+      const shops = await Shop.find({ isHidden: false }).populate({
+        path: 'entity',
+        populate: {
+          path: 'promoCode',
+          model: 'PromoCode'
+        }
+      });
       return res.send(shops);
     } catch (e) {
       res.status(400).send({'error': 'An error has occurred'});
