@@ -20,7 +20,7 @@ module.exports = app => {
 
       try {
         const totalOrders = await Order.find({});
-        const filter = { number: {$regex : `.*${search}.*`, $options:'i'} };
+        const filter = { number: {$regex : `.*${search}.*`, $options:'i'}, paid: true };
         if (shop) {
           filter.shop = shop
         }
