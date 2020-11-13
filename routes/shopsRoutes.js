@@ -73,8 +73,7 @@ module.exports = app => {
       try {
         const { address, coordinate, entity, isHidden, commission, color } = req.body;
         if (
-          !coordinate.latitude ||
-          !coordinate.longitude ||
+          !coordinate ||
           !address ||
           !entity ||
           (isHidden === undefined) ||

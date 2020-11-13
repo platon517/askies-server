@@ -27,6 +27,7 @@ module.exports = app => {
         const orders = await Order
           .find(filter)
           .populate('shop')
+          .populate('appUser')
           .populate('products.product')
           .populate('products.options')
           .populate('products.volume')
