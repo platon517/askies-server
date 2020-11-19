@@ -63,6 +63,10 @@ const orderSchema = mongoose.Schema({
   paid: {
     type: Boolean
   },
+  isFreeOrder: {
+    type: Boolean,
+    required: true
+  },
   status: {
     type: String,
     required: true

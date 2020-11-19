@@ -23,6 +23,14 @@ const entitySchema = mongoose.Schema({
     type: String,
     required: false
   },
+  freeOrderPaymentKassaId: {
+    type: String,
+    required: false
+  },
+  freeOrderPaymentId: {
+    type: String,
+    required: false
+  },
 });
 
 module.exports = mongoose.model('Entity', entitySchema);

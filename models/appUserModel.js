@@ -33,6 +33,9 @@ const appUserSchema = mongoose.Schema({
       }
     }],
     select: false
+  },
+  freeOrderUsed: {
+    type: Boolean,
   }
 });
 

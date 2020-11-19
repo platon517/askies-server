@@ -49,6 +49,9 @@ const productSchema = mongoose.Schema({
   order: {
     type: Number,
     required: false
+  },
+  isInFreeOrder: {
+    type: Boolean
   }
 });
 

@@ -61,6 +61,24 @@ module.exports = app => {
     }
   });
 
+  app.put('/products/:id/set-free', async (req, res) => {
+    if (await adminVerify(req, res)) {
+      try {
+        const { id } = req.params;
+        const { value } = req.body;
+        if ( !id ) {
+          return res.status(400).send('id не найдено');
+        }
+
+        await Product.update({ _id: id }, { $set: { isInFreeOrder: value } });
+        const product = await Product.findOne({ _id: id });
+        return res.send(product);
+      } catch (e) {
+        res.status(400).send({'error': 'An error has occurred'});
+      }
+    }
+  });
+
   app.put("/products/:id", upload.single("image"), async (req, res) => {
     if (await adminVerify(req, res)) {
       const { id } = req.params;

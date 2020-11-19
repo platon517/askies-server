@@ -1,3 +1,4 @@
+const axios = require('axios');
 const Entity = require('../models/entityModel');
 const Order = require('../models/orderModel');
 const Shop = require('../models/shopModel');
@@ -5,6 +6,7 @@ const Payment = require('../models/paymentModel');
 const AppUser = require('../models/appUserModel');
 const adminVerify = require('../helpers/adminVerify');
 const sendNotification = require('../helpers/sendNotification');
+const uniqid = require('uniqid');
 
 module.exports = app => {
 
@@ -65,6 +67,30 @@ module.exports = app => {
 
   app.post('/payments/notifications', async (req, res) => {
     if (req.body.event === 'payment.waiting_for_capture') {
+      if (req.body.object.description === 'CARD_BINDING') {
+        const { payment_method } = req.body.object;
+        if (payment_method.saved && payment_method.type === 'bank_card') {
+          const entity = await Entity.findOne({ freeOrderPaymentKassaId: req.body.object.id });
+
+          await Entity.updateOne(
+            { freeOrderPaymentKassaId: req.body.object.id },
+            { $set: { freeOrderPaymentId: payment_method.id } }
+          );
+          axios.post(`/payments/${req.body.object.id}/cancel/`, {}, {
+            headers: {
+              'Idempotence-Key' : uniqid(),
+            },
+            auth: {
+              username: entity.kassaShopId,
+              password: entity.kassaApiToken
+            }
+          }).then(async response => {
+            return res.send('OK');
+          });
+          console.log('CARD_BINDING', payment_method.id);
+        }
+        return res.status(400).send('Error');
+      }
       try {
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
         const order = await Order

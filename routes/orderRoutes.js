@@ -52,9 +52,54 @@ module.exports = app => {
   });
 
   app.post("/orders", async (req, res) => {
-    const { products, shop, waitTime, appUser, promoCode, savedMethodId = null } = req.body;
+    const {
+      products,
+      shop,
+      waitTime,
+      appUser,
+      promoCode,
+      savedMethodId = null,
+      saveFreeCard = false,
+      isFreeOrder = false
+    } = req.body;
 
     let number;
+
+    if (saveFreeCard) {
+      const shopObj = await Shop.findOne({ _id: shop });
+      const entity = await Entity.findOne({ _id: shopObj.entity });
+      if (entity.freeOrderPaymentId) {
+        return res.status(400).send('Карта уже привязана')
+      }
+
+      const data = {
+        "amount": {
+          "value": 5,
+          "currency": "RUB"
+        },
+        "confirmation": {
+          "type": "embedded",
+          "return_url": "https://success.vendetta-coffee.ru"
+        },
+        "capture": false,
+        "description": `CARD_BINDING`,
+      };
+
+      axios.post(`/payments/`, data, {
+        headers: {
+          'Idempotence-Key' : uniqid(),
+        },
+        auth: {
+          username: entity.kassaShopId,
+          password: entity.kassaApiToken
+        }
+      }).then(async response => {
+        await Entity.updateOne({ _id: entity._id }, { $set: { freeOrderPaymentKassaId: response.data.id } });
+        return res.send({ confirmationToken: response.data.confirmation.confirmation_token });
+      })
+        .catch(err => console.log(err));
+      return false;
+    }
 
     const generateNumber = async () => {
       number = Math.random()
@@ -80,10 +125,15 @@ module.exports = app => {
       order.waitTime = waitTime;
       order.createdAt = new Date();
       order.status = WAITING;
+      order.isFreeOrder = isFreeOrder;
 
       const user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
       const shopObj = await Shop.findOne({ _id: shop });
       const entity = await Entity.findOne({ _id: shopObj.entity });
+
+      if (isFreeOrder && (!user.freeOrderUsed || !entity.freeOrderPaymentId)) {
+        return res.status('400').send('Кофейня не может принять этот заказ.');
+      }
 
       if (promoCode) {
         if (entity.promoCode && entity.promoCode.equals(promoCode)) {
@@ -91,10 +141,18 @@ module.exports = app => {
         }
       }
 
+      if (isFreeOrder && !user.freeOrderUsed) {
+        order.promoCode = entity.promoCode;
+      }
+
       await order.save();
       const savedOrder = await Order.findOne({ _id: order._id }).populate('products.product');
 
-      const paymentMethod = user.paymentMethods.find(method => method._id.equals(savedMethodId));
+      const paymentMethod =
+        (isFreeOrder && !user.freeOrderUsed) ?
+          { paymentId: entity.freeOrderPaymentId }
+          :
+          user.paymentMethods.find(method => method._id.equals(savedMethodId));
 
       const data = {
         "amount": {
@@ -128,8 +186,10 @@ module.exports = app => {
         if (!paymentMethod) {
           updates.confirmationToken = response.data.confirmation.confirmation_token;
         }
+        if (isFreeOrder) {
+          await AppUser.updateOne({ _id: appUser }, { $set: { freeOrderUsed: true } });
+        }
         await Order.updateOne({ _id: savedOrder._id }, { $set: updates });
-
         const result = {};
         result._id = savedOrder._id;
         if (!paymentMethod) {
@@ -245,6 +305,10 @@ module.exports = app => {
         const entity = await Entity.findOne({ _id: shopObj.entity });
 
         await Order.updateOne({ _id: id }, { $set: { status: DECLINED } });
+
+        if (order.isFreeOrder) {
+          await AppUser.updateOne({ _id: order.appUser._id }, { $set: { freeOrderUsed: false } });
+        }
 
         axios.post(`/payments/${order.paymentId}/cancel/`, {}, {
           headers: {

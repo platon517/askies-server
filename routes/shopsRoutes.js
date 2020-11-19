@@ -27,7 +27,8 @@ module.exports = app => {
         populate: {
           path: 'promoCode',
           model: 'PromoCode'
-        }
+        },
+        select: ['-kassaShopId', '-kassaApiToken', '-freeOrderPaymentKassaId', '-freeOrderPaymentId'],
       });
       return res.send(shops);
     } catch (e) {

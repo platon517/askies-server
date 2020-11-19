@@ -1,5 +1,6 @@
 const axios = require('axios');
 const AppUser = require('../models/appUserModel');
+const Entity = require('../models/entityModel');
 const adminVerify = require('../helpers/adminVerify');
 
 module.exports = app => {
@@ -125,6 +126,17 @@ module.exports = app => {
       } catch (error) {
         return res.status(400).send('error');
       }
+    }
+  });
+
+  app.get('/app-users/:id/free-order/:entityId', async (req, res) => {
+    const { id } = req.params;
+    try {
+      let user = await AppUser.find({ _id: id });
+      let entity = await Entity.find({ _id: entityId }).select('+freeOrderPaymentId');
+      return res.send({ result: !user.freeOrderUsed && entity.freeOrderPaymentId });
+    } catch (error) {
+      return res.status(400).send('error');
     }
   });
 
