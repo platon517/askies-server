@@ -134,7 +134,7 @@ module.exports = app => {
     try {
       let user = await AppUser.find({ _id: id });
       let entity = await Entity.find({ _id: entityId }).select('+freeOrderPaymentId');
-      return res.send({ result: { user, entity } });
+      return res.send({ result: (!user.freeOrderUsed) });
     } catch (error) {
       return res.status(400).send('error');
     }
