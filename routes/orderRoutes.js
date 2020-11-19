@@ -131,7 +131,7 @@ module.exports = app => {
       const shopObj = await Shop.findOne({ _id: shop });
       const entity = await Entity.findOne({ _id: shopObj.entity });
 
-      if (isFreeOrder && (!user.freeOrderUsed || !entity.freeOrderPaymentId)) {
+      if (isFreeOrder && (user.freeOrderUsed || !entity.freeOrderPaymentId)) {
         return res.status('400').send('Кофейня не может принять этот заказ.');
       }
 
