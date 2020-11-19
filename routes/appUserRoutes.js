@@ -132,8 +132,8 @@ module.exports = app => {
   app.get('/app-users/:id/free-order/:entityId', async (req, res) => {
     const { id, entityId } = req.params;
     try {
-      let user = await AppUser.find({ _id: id });
-      let entity = await Entity.find({ _id: entityId }).select('+freeOrderPaymentId');
+      let user = await AppUser.findOne({ _id: id });
+      let entity = await Entity.findOne({ _id: entityId });
       return res.send({ result: (!user.freeOrderUsed && entity.freeOrderPaymentId) });
     } catch (error) {
       return res.status(400).send('error');
