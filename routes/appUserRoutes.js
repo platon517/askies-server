@@ -130,7 +130,7 @@ module.exports = app => {
   });
 
   app.get('/app-users/:id/free-order/:entityId', async (req, res) => {
-    const { id } = req.params;
+    const { id, entityId } = req.params;
     try {
       let user = await AppUser.find({ _id: id });
       let entity = await Entity.find({ _id: entityId }).select('+freeOrderPaymentId');
