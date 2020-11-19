@@ -86,10 +86,11 @@ module.exports = app => {
             }
           }).then(async response => {
             return res.send('OK');
+          }).catch(err => {
+            return res.status(400).send('Error');
           });
           console.log('CARD_BINDING', payment_method.id);
         }
-        return res.status(400).send('Error');
       }
       try {
         await Order.updateOne({ paymentId: req.body.object.id }, { $set: { paid: true } });
