@@ -16,13 +16,16 @@ module.exports = app => {
 
   app.get("/orders", async (req, res) => {
     if (await adminVerify(req, res)) {
-      const { skip, limit, search = '', shop } = req.query;
+      const { skip, limit, search = '', shop, type } = req.query;
 
       try {
         const totalOrders = await Order.find({});
         const filter = { number: {$regex : `.*${search}.*`, $options:'i'}, paid: true };
         if (shop) {
           filter.shop = shop
+        }
+        if (type) {
+          filter.isFreeOrder = type === 'free'
         }
         const orders = await Order
           .find(filter)
