@@ -167,7 +167,7 @@ module.exports = app => {
           "return_url": "https://success.vendetta-coffee.ru"
         },
         "capture": false,
-        "description": `Заказ #${number}`,
+        "description": `Заказ #${number} ${isFreeOrder ? 'free' : ''}`,
       };
 
       if (paymentMethod) {

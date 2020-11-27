@@ -89,7 +89,6 @@ module.exports = app => {
           }).catch(err => {
             return res.status(400).send('Error');
           });
-          console.log('CARD_BINDING', payment_method.id);
         }
       }
       try {
@@ -97,6 +96,8 @@ module.exports = app => {
         const order = await Order
           .findOne({ paymentId: req.body.object.id })
           .populate({ path: 'shop', select: '+employeesPhoneNumbers' });
+        const shopObj = await Shop.findOne({ _id: order.shop });
+        const entity = await Entity.findOne({ _id: shopObj.entity });
 
         if (order.shop.employeesPhoneNumbers) {
           order.shop.employeesPhoneNumbers.map(async (phone) => {
@@ -116,7 +117,12 @@ module.exports = app => {
           });
         }
         const { payment_method } = req.body.object;
-        if (payment_method.saved && payment_method.type === 'bank_card') {
+        if (
+          payment_method.saved &&
+          payment_method.type === 'bank_card' &&
+          payment_method.id !== entity.freeOrderPaymentId &&
+          req.body.object.description.split(' ').pop() !== 'free'
+        ) {
           const user = await AppUser.findOne({ _id: order.appUser }).select('+paymentMethods');
           if (!user.paymentMethods || !user.paymentMethods.find(method => method.paymentId === payment_method.id)) {
             await AppUser.updateOne(
