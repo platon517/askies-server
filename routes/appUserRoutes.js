@@ -89,11 +89,12 @@ module.exports = app => {
       return res.status(400).send('Пользователь не найден');
     }
     try {
+      let entity = await Entity.findOne({ _id: entity });
       let user = await AppUser.findOne({ _id: appUser }).select('+paymentMethods');
       if (user.paymentMethods) {
         const paymentMethods =
           user.paymentMethods
-            .filter(method =>  method.entity && method.entity.equals(entity))
+            .filter(method =>  method.entity && method.entity.equals(entity) && (method.paymentId !== entity.freeOrderPaymentId))
             .map(method => ({ _id: method._id, card: method.card }));
         return res.send(paymentMethods);
       }
