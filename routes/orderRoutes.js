@@ -82,6 +82,7 @@ module.exports = app => {
         },
         "confirmation": {
           "type": "embedded",
+          "locale": "en_US",
           "return_url": "https://success.vendetta-coffee.ru"
         },
         "capture": false,
@@ -164,7 +165,8 @@ module.exports = app => {
         },
         "confirmation": {
           "type": paymentMethod ? "redirect" : "embedded",
-          "return_url": "https://success.vendetta-coffee.ru"
+          "return_url": "https://success.vendetta-coffee.ru",
+          "locale": "en_US",
         },
         "capture": false,
         "description": `Заказ #${number} ${isFreeOrder ? 'free' : ''}`,
@@ -409,7 +411,7 @@ module.exports = app => {
             :
             {
               ...order.toObject(),
-              number: (order.status === DECLINED || order.status === PAYMENT_DECLINED) ? 'Отменен' : 'Ожидается'
+              number: (order.status === DECLINED || order.status === PAYMENT_DECLINED) ? 'Cancelled' : 'Waiting'
             }
           )
       );
