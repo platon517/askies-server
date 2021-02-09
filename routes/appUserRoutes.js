@@ -60,7 +60,7 @@ module.exports = app => {
     if ( appUser.smsCode === code ) {
       res.send(appUser._id);
     } else {
-      res.status(400).send('Неверный код')
+      res.status(400).send('Invalid code')
     }
 
   });

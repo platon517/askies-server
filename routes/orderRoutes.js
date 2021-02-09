@@ -136,7 +136,7 @@ module.exports = app => {
       const entity = await Entity.findOne({ _id: shopObj.entity });
 
       if (isFreeOrder && (user.freeOrderUsed || !entity.freeOrderPaymentId)) {
-        return res.status('400').send('Кофейня не может принять этот заказ.');
+        return res.status('400').send('The coffee shop cannot accept this order.');
       }
 
       if (promoCode) {
@@ -209,7 +209,7 @@ module.exports = app => {
     if (selectedShop.isActive) {
       await generateNumber();
     } else {
-      res.status(400).send('Кофейня закрыта');
+      res.status(400).send('The coffee shop is closed');
     }
   });
 
@@ -434,6 +434,20 @@ module.exports = app => {
         .populate('products.volume');
 
       const shop = await Shop.findOne({ _id: order.shop }).populate('entity');
+
+      if (order.status !== ACCEPTED) {
+        setTimeout(async () => {
+          await Order.updateOne({ _id: order._id }, { $set: { status: ACCEPTED } });
+          await sendNotification({
+            to: order.appUser.pushToken,
+            sound: 'default',
+            title: 'Заказ подтвержден',
+            body: `Номер заказа: ${order.number}`,
+            data: { type: 'ORDER', orderId: order._id },
+            priority: 'high'
+          });
+        }, 5000);
+      }
 
       axios.get(`/payments/${order.paymentId}/`, {
         auth: {
