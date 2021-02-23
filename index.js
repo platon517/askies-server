@@ -22,8 +22,9 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-//const dbPath = 'mongodb+srv://prod:HWiIGYqXKIkap63t@main.nt3vv.mongodb.net/main?retryWrites=true&w=majority';
-const dbPath = 'mongodb://127.0.0.1:27017/prod';
+//const dbPath = 'mongodb://127.0.0.1:27017/prod';
+const dbPath =
+  'mongodb+srv://platon517:Gf7eu76XRlkDwiCX@cluster0.xpmq8.mongodb.net/main?retryWrites=true&w=majority';
 const options = {useNewUrlParser: true, useUnifiedTopology: true};
 const mongo = mongoose.connect(dbPath, options);
 

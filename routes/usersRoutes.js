@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const jwtConfig = require('../config/jwtConfig');
 const User = require('../models/userModel');
-const { admin, entityAdmin, barista } = require('../constants/accountTypes');
 
 const saltRounds = 10;
 
@@ -18,22 +17,27 @@ module.exports = app => {
   });
 
   app.post("/users", async (req, res) => {
-    const { login, password, accountType, shop, entity } = req.body;
+    const { login, password } = req.body;
     try {
-      const user = new User();
-      if ( !login || !password || !accountType ) {
-        return res.status(400).send('Заполните все поля');
+      const sameLoginUser = await User.findOne({ login });
+
+      const errors = {};
+      if ( !login ) {
+        errors.login = 'Enter login';
       }
+      if ( !password ) {
+        errors.password = 'Enter password';
+      }
+      if ( login && sameLoginUser ) {
+        errors.login = 'Login is already exists';
+      }
+      if (Object.entries(errors).length > 0) {
+        return res.status(400).send({ errors });
+      }
+
+      const user = new User();
       user.login = login;
       user.password = await bcrypt.hash(password, saltRounds);
-      user.accountType = accountType;
-      if (accountType === barista) {
-        if ( !entity || !shop ) {
-          return res.status(400).send('Заполните все поля');
-        }
-        user.entity = entity;
-        user.shop = shop;
-      }
 
       const savedUser = await user.save();
 
@@ -63,7 +67,6 @@ module.exports = app => {
       const user = new User();
       user.login = login;
       user.password =  await bcrypt.hash(password, saltRounds);
-      user.accountType = admin;
       await user.save();
     }
 
@@ -74,14 +77,11 @@ module.exports = app => {
 
       if (result) {
         const token = jwt.sign({ _id: user._id }, jwtConfig.secret, {
-          expiresIn: user.accountType === barista ? 86400 * 365 : 86400// expires in 24 hours
+          expiresIn: 86400 * 365 // expires in 24 hours
         });
         res.send({
           _id: user._id,
           login: user.login,
-          accountType: user.accountType,
-          entity: user.entity,
-          shop: user.shop,
           token
         });
       } else {
