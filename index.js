@@ -7,7 +7,13 @@ require('dotenv').config();
 
 app.use(cors({credentials: true, origin: true}));
 
-app.options('*', cors());
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'askies.vercel.app');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    next();
+});
 
 app.get('/', (req, res) => res.send('Welcome to Express'));
 
