@@ -7,6 +7,8 @@ require('dotenv').config();
 
 app.use(cors({credentials: true, origin: true}));
 
+app.options('*', cors());
+
 app.get('/', (req, res) => res.send('Welcome to Express'));
 
 app.listen(port, function() {
