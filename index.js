@@ -5,15 +5,7 @@ const port = process.env.PORT || 8080;
 const combinedRoutes = require('./routes/combinedRoutes');
 require('dotenv').config();
 
-app.use(cors({credentials: true, origin: true}));
-
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'askies.vercel.app');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-
-    next();
-});
+app.use(cors());
 
 app.get('/', (req, res) => res.send('Welcome to Express'));
 
