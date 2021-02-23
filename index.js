@@ -5,7 +5,7 @@ const port = process.env.PORT || 8080;
 const combinedRoutes = require('./routes/combinedRoutes');
 require('dotenv').config();
 
-app.use(cors());
+app.use(cors({credentials: true, origin: true}));
 
 app.get('/', (req, res) => res.send('Welcome to Express'));
 
